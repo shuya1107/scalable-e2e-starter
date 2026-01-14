@@ -1,0 +1,36 @@
+[
+  [
+    {
+      "memberCode": "M009",
+      "key": "LOGIN_STANDARD",
+      "status": "active"
+    },
+    {
+      "memberCode": "M022",
+      "key": "LOGIN_ERROR",
+      "status": "locked"
+    },
+    {
+      "memberCode": "M939",
+      "key": "ADMIN_ACCESS",
+      "status": "admin"
+    }
+  ],
+  [
+    {
+      "memberCode": "M053",
+      "key": "LOGIN_STANDARD",
+      "status": "active"
+    },
+    {
+      "memberCode": "M064",
+      "key": "LOGIN_ERROR",
+      "status": "locked"
+    },
+    {
+      "memberCode": "M990",
+      "key": "ADMIN_ACCESS",
+      "status": "admin"
+    }
+  ]  
+]
