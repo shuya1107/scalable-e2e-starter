@@ -1,4 +1,6 @@
 import { Page } from '@playwright/test';
+import { user } from '../../src/testDataType/testDataType';
+
 
 export interface TestStrategy {
 
@@ -6,6 +8,6 @@ export interface TestStrategy {
     stepName: string;
 
     //真偽値を返すことでテストが失敗したときに終了させるようにする
-    execute(page: Page, data: any): Promise<boolean>;
+    execute(page: Page, data: user): Promise<boolean>;
 
 }

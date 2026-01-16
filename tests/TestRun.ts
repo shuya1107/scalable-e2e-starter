@@ -4,12 +4,8 @@ import userDataList from './testdata/users.json';
 import { createStrategies } from './src/factory/testFactory';
 import testContent from './testdata/testContent.json';
 import { TestLogger } from './src/utils/TestLogger';
+import { ScenarioStep, user, Test } from './src/testDataType/testDataType';
 
-type ScenarioStep = Record<string, string>;
-interface user {
-    memberCode: string;
-    key: string;
-}
 
 //テスト実行関数
 export function run() {
@@ -52,7 +48,7 @@ export function runScenarioGroup({scenarios, scenarioNumber}: TestGroup) {
         if (!targetUsers) return;
 
         //テストスタート
-        targetUsers.forEach((data) => {
+        targetUsers.forEach((data:user) => {
             //テストシナリオと会員の情報を渡す
             runUserTest({
                 userData: data,         //会員の情報
@@ -64,10 +60,7 @@ export function runScenarioGroup({scenarios, scenarioNumber}: TestGroup) {
 
 }
 
-type Test = {
-    userData: user;
-    scenarios: ScenarioStep[];
-}
+
 
 //実際にテストを行う関数
 export function runUserTest({userData, scenarios}: Test) {

@@ -1,4 +1,4 @@
-import { MyJavaApp } from "../testContent/MyJavaApp";
+import { MyJavaApp } from "../testContent/testA/MyJavaApp";
 import { TestStrategy } from "./TestStrategy";
 
 export const strategyRecord: Record<string, { new(): TestStrategy }> = {
