@@ -1,6 +1,6 @@
 import { test } from '@playwright/test';
 
-import { run } from './TestRun';
+import { run } from '../src/TestRun/TestRun';
 
 
 //コンフィグファイルに設定しても動画をとってくれないため起動ファイルに直書きしてます。

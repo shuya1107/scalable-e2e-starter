@@ -1,6 +1,5 @@
 import { Page, expect } from '@playwright/test';
 import { TestStrategy } from '../../strategiesConfig/TestStrategy';
-import testAScenario from '../../../testdata/testAScenario.json';
 import { testAactions } from './function/functionStrategiesConfig';
 import { user } from '../../testDataType/testDataType';
 
@@ -8,13 +7,12 @@ export class MyJavaApp implements TestStrategy {
   
     stepName = '自作アプリ（Google検索）';
 
-    async execute(page: Page, data: user): Promise<boolean> {
+    async execute(page: Page, data: user, functions:any): Promise<boolean> {
         
         try {
             
-            for (const task of testAScenario ) {
-                const values = Object.values(task);
-                const actionName = values[0] as string;
+            for (const task of functions ) {
+                const actionName = task[0] as string;
 
                 // 関数を取り出す
                 const actionFunction = testAactions[actionName];

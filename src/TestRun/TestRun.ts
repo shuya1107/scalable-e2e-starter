@@ -1,40 +1,49 @@
 import { test } from '@playwright/test';
-
-import userDataList from './testdata/users.json';
-import { createStrategies } from './src/factory/testFactory';
-import testContent from './testdata/testContent.json';
-import { TestLogger } from './src/utils/TestLogger';
-import { ScenarioStep, user, Test } from './src/testDataType/testDataType';
+import { testContentsListFactory } from '../factory/testContentsListFactory';
+import userDataList from '../../testdata/users.json';
+import { createStrategies } from '../factory/testFactory';
+import { TestLogger } from '../utils/TestLogger';
+import { ScenarioStep, user, Test } from '../testDataType/testDataType';
+import { testFunctinListFactory } from '../factory/testFunctionListFactory';
 
 
 //テスト実行関数
 export function run() {
 
-    // 例: [ [TestA, TestB], [TestC] ]
-    // TestA → TestB　（シナリオ1）
-    // TestC         （シナリオ2）
-    // 2つのテストを行う
-    const testScenarios = testContent;
+    //JSONの情報からテストのシナリオと関数をそれぞれ配列にする
+    const scenarioList = testContentsListFactory();
+    const functionList = testFunctinListFactory();
+
+    console.log('シナリオリスト:', scenarioList);
+    console.log('関数リスト:', functionList);
+    
+
 
     //それぞれのテストシナリオで処理を行う
-    testScenarios.forEach((scenarioList, scenarioIndex) => {
+    scenarioList.forEach((testScenario, scenarioIndex) => {
+
+        const myFunctionList = functionList[scenarioIndex];
+
         runScenarioGroup({
-            scenarios: scenarioList,            //テストシナリオの配列が入っている
-            scenarioNumber: scenarioIndex       //シナリオナンバーが入っている
+            scenarios: testScenario,          //テストシナリオの配列が入っている
+            scenarioNumber: scenarioIndex,    //シナリオナンバーが入っている
+            functions : myFunctionList
         });
     });
+    
 
 }
 
 
 
 type TestGroup = {
-    scenarios: ScenarioStep[];  // シナリオの配列
+    scenarios: any;  // シナリオの配列
     scenarioNumber: number;     // シナリオ番号
+    functions : any;
 };
 
 //テストのシナリオを準備をする関数
-export function runScenarioGroup({scenarios, scenarioNumber}: TestGroup) {
+export function runScenarioGroup({scenarios, scenarioNumber, functions}: TestGroup) {
 
     // レポートで見やすいように「グループ化」
     // シナリオで1人、一つのファイルにまとめて出してくれる
@@ -52,10 +61,10 @@ export function runScenarioGroup({scenarios, scenarioNumber}: TestGroup) {
             //テストシナリオと会員の情報を渡す
             runUserTest({
                 userData: data,         //会員の情報
-                scenarios: scenarios    //シナリオの配列
+                scenarios: scenarios,   //シナリオの配列
+                functions: functions    //関数のリスト
             });
         });
-
     });
 
 }
@@ -63,7 +72,7 @@ export function runScenarioGroup({scenarios, scenarioNumber}: TestGroup) {
 
 
 //実際にテストを行う関数
-export function runUserTest({userData, scenarios}: Test) {
+export function runUserTest({userData, scenarios, functions}: Test) {
 
     // レポート用のタイトルに memberCodeを入れてわかりやすくする
     test(`Test - Member: ${userData.memberCode} `, async ({ page }, testInfo) => {
@@ -86,7 +95,7 @@ export function runUserTest({userData, scenarios}: Test) {
                     logger.log(`Step: ${strategy.stepName} を実行中...`);
 
                     //テスト起動
-                    const result = await strategy.execute(page, userData);
+                    const result = await strategy.execute(page, userData,functions);
 
                     if (!result) {
                         // 失敗したらエラーを投げる（catchに飛ぶ）

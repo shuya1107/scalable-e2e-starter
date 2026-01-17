@@ -8,6 +8,6 @@ export interface TestStrategy {
     stepName: string;
 
     //真偽値を返すことでテストが失敗したときに終了させるようにする
-    execute(page: Page, data: user): Promise<boolean>;
+    execute(page: Page, data: user, functions:any): Promise<boolean>;
 
 }

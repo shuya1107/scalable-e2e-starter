@@ -1,5 +1,5 @@
 //型定義後から変更になっても問題ない追加するだけならね（interface)JSONも変更しないとだけど
-export type ScenarioStep = Record<string, string>;
+export type ScenarioStep = string[];
 
 export interface user {
     memberCode: string;
@@ -8,5 +8,6 @@ export interface user {
 
 export type Test = {
     userData: user;
-    scenarios: ScenarioStep[];
+    scenarios: ScenarioStep;
+    functions: any;
 }
