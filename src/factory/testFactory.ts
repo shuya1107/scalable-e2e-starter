@@ -1,9 +1,12 @@
 import { TestStrategy } from "../strategiesConfig/TestStrategy";
 import { strategyRecord } from "../strategiesConfig/strategyRecord";
 
-const instances: TestStrategy[] = [];
 
+
+//　テストをしたいシナリオの配列を受け取りインスタンス化をする関数
 export function createStrategies(scenarioList: string[]): TestStrategy[] {
+
+    const instances: TestStrategy[] = [];
 
 
     scenarioList.forEach((key) => {

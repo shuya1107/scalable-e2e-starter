@@ -1,3 +1,7 @@
+import { TestLogger } from "../utils/TestLogger";
+
+
+
 //型定義後から変更になっても問題ない追加するだけならね（interface)JSONも変更しないとだけど
 export type ScenarioStep = string[];
 
@@ -7,7 +11,15 @@ export interface user {
 }
 
 export type Test = {
-    userData: user;
-    scenarios: ScenarioStep;
-    functions: any;
+    data: user;
+    testScenario: ScenarioStep;
+    myFunctionList: any[];
+    mainLogger: TestLogger;
 }
+
+export type TestGroup = {
+    testScenario: any;  // シナリオの配列
+    scenarioIndex: number;     // シナリオ番号
+    myFunctionList : any[];
+    mainLogger: TestLogger;
+};

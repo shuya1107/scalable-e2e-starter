@@ -6,11 +6,13 @@ import { TestLogger } from '../../utils/TestLogger';
 
 export class MyJavaApp implements TestStrategy {
   
-    stepName = '自作アプリ（Google検索）';
+    stepName = '自作アプリ';
 
     async execute(page: Page, data: user, functions:any, testInfo: any, strategyIndex: number): Promise<boolean> {
         
+        //@strategyIndex はテストのシナリオが入っている配列のインデックス番号
         const index = strategyIndex || 0;
+        //　ログファイルを作成　システム名_シナリオ手順番号.log で保存される
         const logger = new TestLogger(testInfo.outputDir, `${this.stepName}_${index}.log`);
         logger.log(`[開始] シナリオ: ${this.stepName} を開始します`);
 
