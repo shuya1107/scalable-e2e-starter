@@ -6,12 +6,12 @@ export class TestLogger {
     private buffer: string[] = [];
     private logPath: string;
 
-    constructor(outputDir: string) {
+    constructor(outputDir: string, fileName: string) {
         // フォルダがなければ作る（あの面倒な処理はコンストラクタに隠す！）
         if (!fs.existsSync(outputDir)) {
             fs.mkdirSync(outputDir, { recursive: true });
         }
-        this.logPath = path.join(outputDir, 'log.txt');
+        this.logPath = path.join(outputDir, fileName);
     }
 
     // ログを記録する（ファイル＆メモリ）

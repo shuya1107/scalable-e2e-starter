@@ -79,7 +79,7 @@ export function runUserTest({userData, scenarios, functions}: Test) {
 
 
         //ログについてのクラス
-        const logger = new TestLogger(testInfo.outputDir);
+        const logger = new TestLogger(testInfo.outputDir, `log.txt`);
 
         try {
 
@@ -89,13 +89,15 @@ export function runUserTest({userData, scenarios, functions}: Test) {
             const testList = createStrategies(scenarios);
 
             // テストシナリオを配列の順番通りに進める
-            for (const strategy of testList) {
+            for (let strategyIndex = 0; strategyIndex < testList.length; strategyIndex++) {
+                const strategy = testList[strategyIndex];
 
                 await test.step(strategy.stepName, async () => {
                     logger.log(`Step: ${strategy.stepName} を実行中...`);
 
                     //テスト起動
-                    const result = await strategy.execute(page, userData,functions);
+                    //テスト情報とこのテストで使う関数のリスト、テストの番号を渡す（何番目のテストなのか）
+                    const result = await strategy.execute(page, userData, functions, testInfo, strategyIndex);
 
                     if (!result) {
                         // 失敗したらエラーを投げる（catchに飛ぶ）
