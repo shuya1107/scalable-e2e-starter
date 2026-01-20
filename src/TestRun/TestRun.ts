@@ -10,15 +10,28 @@ import { testFunctinListFactory } from '../factory/testFunctionListFactory';
 //テスト実行関数
 export function run() {
 
-    const mainLogger = new TestLogger("./logs", "System.log");
+    // 「自分が何番目の作業員か」を確認する。
+    const workerIndex = process.env.TEST_WORKER_INDEX ;
+
+    // 「0番（リーダー）」の時だけ、ログ係を担当する
+    const isLeader = (workerIndex === '0');
+
+    const mainLogger = isLeader ? new TestLogger("./logs", "System.log") : null;
+
+    if (mainLogger) {
+        mainLogger.log("=====================================");
+        mainLogger.log(`${new Date()}テスト実行を開始します`);
+    }
+    
 
     //JSONの情報からテストのシナリオと関数をそれぞれ配列にする
     const scenarioList = testContentsListFactory();
     const functionList = testFunctinListFactory();
 
-    mainLogger.log(`シナリオリスト: ${JSON.stringify(scenarioList)}`);
-    mainLogger.log(`関数リスト:${JSON.stringify(functionList)}`);
-    
+    if (mainLogger) {
+        mainLogger.log(`シナリオリスト: ${JSON.stringify(scenarioList)}`);
+        mainLogger.log(`関数リスト:${JSON.stringify(functionList)}`);
+    }
 
 
     //それぞれのテストシナリオで処理を行う
@@ -42,7 +55,9 @@ export function run() {
 export function runScenarioGroup({testScenario, scenarioIndex, myFunctionList, mainLogger}: TestGroup) {
 
 
-    mainLogger.log(`\n=== シナリオグループ ${scenarioIndex + 1} を開始します ===`);
+    if (mainLogger) {
+        mainLogger.log(`runScenarioGroup 開始します - シナリオ番号: ${scenarioIndex}`);
+    }
 
     // レポートで見やすいように「グループ化」
     // シナリオで1人、一つのファイルにまとめて出してくれる
@@ -53,12 +68,17 @@ export function runScenarioGroup({testScenario, scenarioIndex, myFunctionList, m
 
         // もしシナリオの数より会員の数が少なかった（配列の数）場合スキップして終わらせる。
         if (!targetUsers) {
-            mainLogger.log(`異常終了(定義不足): シナリオ番号 ${scenarioIndex} に対応する会員データがありません。`);
-            mainLogger.log(`user.json の配列数と testContents.json の配列数を確認してください。`);
+            if(mainLogger){
+                mainLogger.log(`異常終了(定義不足): シナリオ番号 ${scenarioIndex} に対応する会員データがありません。`);
+                mainLogger.log(`user.json の配列数と testContents.json の配列数を確認してください。`);
+            }
             return;
         }
 
-        mainLogger.log(`シナリオ番号 ${scenarioIndex} の会員データ: ${JSON.stringify(targetUsers)}`);
+        if(mainLogger){
+            mainLogger.log(`シナリオ番号 ${scenarioIndex} の会員データ: ${JSON.stringify(targetUsers)}`);
+        }
+        
 
         //テストスタート
         targetUsers.forEach((data:user) => {
@@ -66,18 +86,17 @@ export function runScenarioGroup({testScenario, scenarioIndex, myFunctionList, m
             runUserTest({
                 data,         //会員の情報
                 testScenario,   //シナリオの配列
-                myFunctionList,    //関数のリスト
-                mainLogger
+                myFunctionList    //関数のリスト
             });
         });
     });
 
 }
 
-//次ここからログの追加を行う
+
 
 //実際にテストを行う関数
-export function runUserTest({data, testScenario, myFunctionList, mainLogger}: Test) {
+export function runUserTest({data, testScenario, myFunctionList}: Test) {
 
     // レポート用のタイトルに memberCodeを入れてわかりやすくする
     test(`Test - Member: ${data.memberCode} `, async ({ page }, testInfo) => {

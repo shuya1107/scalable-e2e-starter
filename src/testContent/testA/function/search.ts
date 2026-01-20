@@ -5,7 +5,7 @@ const functionName = "search";
 export const search: ActionFn = async (page, data, logger) => {
     logger.log(`${functionName}開始`);
     try {
-        console.log("何らかの処理を入れてね");
+        console.log("検索処理について");
         
         logger.log(`${functionName}成功`);
         // 成功

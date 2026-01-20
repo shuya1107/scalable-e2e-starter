@@ -14,12 +14,11 @@ export type Test = {
     data: user;
     testScenario: ScenarioStep;
     myFunctionList: any[];
-    mainLogger: TestLogger;
 }
 
 export type TestGroup = {
     testScenario: any;  // シナリオの配列
     scenarioIndex: number;     // シナリオ番号
     myFunctionList : any[];
-    mainLogger: TestLogger;
+    mainLogger: TestLogger | null;
 };

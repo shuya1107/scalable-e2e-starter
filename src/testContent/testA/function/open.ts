@@ -5,7 +5,7 @@ const functionName = "open";
 export const open: ActionFn = async (page, data, logger) => {
     logger.log(`${functionName}開始`);
     try {
-        console.log("何らかの処理を追加");
+        console.log("ログイン処理について");
         
         logger.log(`${functionName}成功`);
         // 成功
