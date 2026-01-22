@@ -21,4 +21,5 @@ export type TestGroup = {
     scenarioIndex: number;     // シナリオ番号
     myFunctionList : any[];
     mainLogger: TestLogger | null;
+    mainDebugLogger?: TestLogger | null;
 };

@@ -11,7 +11,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   //CI（本番環境）では2回試す（失敗した場合）ローカルは一回だけ行い失敗したらテスト失敗
 
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 1,
   //ブラウザを何個同時に開くかCI（本番環境）では１つローカル環境では自動で最大
 
   reporter: 'html',
