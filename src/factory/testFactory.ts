@@ -1,4 +1,4 @@
-import { TestStrategy } from "../strategiesConfig/TestStrategy";
+import type { TestStrategy } from "../typeList";
 import { strategyRecord } from "../strategiesConfig/strategyRecord";
 
 

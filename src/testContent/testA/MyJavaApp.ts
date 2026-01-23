@@ -1,14 +1,14 @@
 import { Page } from '@playwright/test';
-import { TestStrategy } from '../../strategiesConfig/TestStrategy';
+import { TestStrategy } from '../../typeList/index';
 import { testAactions } from './function/functionStrategiesConfig';
-import { user } from '../../testDataType/testDataType';
 import { TestLogger } from '../../utils/TestLogger';
+import type { User, ScenarioFunctionList } from '../../typeList';
 
 export class MyJavaApp implements TestStrategy {
   
     stepName = '自作アプリ';
 
-    async execute(page: Page, data: user, functions:any, testInfo: any, strategyIndex: number): Promise<boolean> {
+    async execute(page: Page, data: User, functions: ScenarioFunctionList, testInfo: any, strategyIndex: number): Promise<boolean> {
         
         //@strategyIndex はテストのシナリオが入っている配列のインデックス番号
         const index = strategyIndex || 0;

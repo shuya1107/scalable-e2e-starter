@@ -2,8 +2,8 @@ import { test } from '@playwright/test';
 import { testContentsListFactory } from '../factory/testContentsListFactory';
 import userDataList from '../../testdata/users.json';
 import { createStrategies } from '../factory/testFactory';
-import { TestLogger, formatLogContext, LogLevel } from '../utils/TestLogger';
-import { ScenarioStep, user, Test, TestGroup } from '../testDataType/testDataType';
+import { TestLogger, formatLogContext } from '../utils/TestLogger';
+import type { LogLevel, User, Test, TestGroup } from '../typeList';
 import { testFunctinListFactory } from '../factory/testFunctionListFactory';
 
 //テスト実行関数
@@ -95,7 +95,7 @@ export function runScenarioGroup({testScenario, scenarioIndex, myFunctionList, m
         
 
         //テストスタート
-        targetUsers.forEach((data:user) => {
+        targetUsers.forEach((data:User) => {
             //テストシナリオと会員の情報を渡す
             runUserTest({
                 data,         //会員の情報

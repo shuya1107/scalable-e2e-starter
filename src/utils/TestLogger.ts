@@ -1,13 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import type { LogContext, LogLevel } from '../typeList';
 
-// ログの共通プレフィックスを生成するためのコンテキスト
-export type LogContext = {
-    scenarioIndex?: number;
-    memberCode?: string;
-    stepName?: string;
-};
-
+// ログの共通プレフィックスを生成する関数
 export function formatLogContext({ scenarioIndex, memberCode, stepName }: LogContext): string {
     const parts: string[] = [];
     if (scenarioIndex !== undefined) parts.push(`scenario=${scenarioIndex + 1}`); // 1始まりで人間に見せる
@@ -18,10 +13,6 @@ export function formatLogContext({ scenarioIndex, memberCode, stepName }: LogCon
     return parts.length ? `[${parts.join('][')}] ` : '';
 }
 
-export type LogLevel = 'debug' | 'info' | 'error';
-//debug 開発中のメモ
-//info テストのログ（通常はこちら）
-//error エラーログ
 const LEVEL_ORDER: Record<LogLevel, number> = { debug: 0, info: 1, error: 2 };
 // それぞれ点数をつける　0点、1点、2点
 

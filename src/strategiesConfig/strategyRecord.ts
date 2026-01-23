@@ -1,7 +1,7 @@
 import { MyJavaApp } from "../testContent/testA/MyJavaApp";
-import { TestStrategy } from "./TestStrategy";
+import type { TestStrategyRecord } from "../typeList/index";
 
-export const strategyRecord: Record<string, { new(): TestStrategy }> = {
+export const strategyRecord: TestStrategyRecord = {
     'MyJavaApp': MyJavaApp
     
     // ↓ TestStrategyを実装してないクラスを入れるとここで赤線エラーになる

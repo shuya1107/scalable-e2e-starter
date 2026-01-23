@@ -1,18 +1,19 @@
 import testContent from '../../testdata/testContent.json';
+import type { ScenarioFunctionList } from '../typeList';
 
 
-export function testFunctinListFactory() {
+export function testFunctinListFactory(): ScenarioFunctionList[] {
 
     const testScenarios = testContent;
 
-    const functionList = [];  // テストの関数の手順を入れる用
+    const functionList: ScenarioFunctionList[] = [];  // テストの関数の手順を入れる用
 
     for (const group of testScenarios) {
         // ここで group はこれ
         // [ { "test1": "MyJavaApp", "scenario": {...} }, { "test2":... } ]
         //JSONの配列一つを取り出す
 
-        const scenarios: any[] = [];
+        const scenarios: ScenarioFunctionList = [];
         
         for (const step of group) {
 

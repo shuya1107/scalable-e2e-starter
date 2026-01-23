@@ -1,4 +1,4 @@
-import { ActionFn } from '../../functionType';
+import type { ActionFn } from '../../../typeList';
 
 const functionName = "open";
 

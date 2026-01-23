@@ -1,11 +1,12 @@
 import testContent from '../../testdata/testContent.json';
+import type { ScenarioStep } from '../typeList';
 
 
-export function testContentsListFactory() {
+export function testContentsListFactory(): ScenarioStep[] {
 
     const testScenarios = testContent;
 
-    const scenarioList = [];  // テストの手順を入れる用
+    const scenarioList: ScenarioStep[] = [];  // テストの手順を入れる用
 
     for (const group of testScenarios) {
 
