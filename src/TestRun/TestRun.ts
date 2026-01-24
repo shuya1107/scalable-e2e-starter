@@ -3,8 +3,9 @@ import { testContentsListFactory } from '../factory/testContentsListFactory';
 import userDataList from '../../testdata/users.json';
 import { createStrategies } from '../factory/testFactory';
 import { TestLogger, formatLogContext } from '../utils/TestLogger';
-import type { LogLevel, User, Test, TestGroup } from '../typeList';
+import type { LogLevel, User, Test, TestGroup, TestExecutionContext, ScenarioStep, ScenarioFunctionList } from '../typeList/index';
 import { testFunctinListFactory } from '../factory/testFunctionListFactory';
+import { TestContentsListFactoryError } from '../error/index';
 
 //テスト実行関数
 export function run() {
@@ -17,51 +18,81 @@ export function run() {
     const mainLogger = new TestLogger("./logs", `System.worker-${workerTag}.log`, logLevel);
     const mainDebugLogger = new TestLogger("./logs", `System.worker-${workerTag}.debug.log`, 'debug');
 
-    //JSONの情報からテストのシナリオと関数をそれぞれ配列にする
-    const scenarioList = testContentsListFactory();
-    const functionList = testFunctinListFactory();
+    // デバッグ用のログファイルがない場合はメインのログファイルに書くようにしている
+    //ただしメインログファイルはINFO以上しか書き込まないためDEBUGログは出力されない
+    const debugLogger = mainDebugLogger ?? mainLogger;
 
-    //全体のシナリオ数と会員数を取得する
-    const totalScenarios = scenarioList.length;
-    const totalMembers = userDataList.reduce((sum, users) => sum + ((users && Array.isArray(users)) ? users.length : 0), 0);
+    try{
+        // テストデータの初期化
+        let scenarioList: ScenarioStep[];
+        let functionList: ScenarioFunctionList[];
 
-    // 実行フェーズだけで開始ログを出す（テスト収集フェーズでは出さない）
-    test.beforeAll(() => {
-        if (mainLogger) {
-            mainLogger.info(`=====================================`);
-            mainLogger.info(`${new Date()} テスト実行を開始します`);
-            mainLogger.info(`総シナリオ数=${totalScenarios} 総メンバー数=${totalMembers}`);
-            // シナリオ・関数リストはデバッグ用途
-            mainLogger.debug(`シナリオリスト: ${JSON.stringify(scenarioList)}`);
-            mainLogger.debug(`関数リスト: ${JSON.stringify(functionList)}`);
-        }
-    });
+        //JSONの情報からテストのシナリオと関数をそれぞれ配列にする
+        scenarioList = testContentsListFactory();
+        functionList = testFunctinListFactory();
 
+        //全体のシナリオ数と会員数を取得する
+        const totalScenarios = scenarioList.length;
+        const totalMembers = userDataList.reduce((sum, users) => sum + ((users && Array.isArray(users)) ? users.length : 0), 0);
 
-    //それぞれのテストシナリオで処理を行う
-    scenarioList.forEach((testScenario, scenarioIndex) => {
-
-        const myFunctionList = functionList[scenarioIndex];
-
-        runScenarioGroup({
-            testScenario,          //テストシナリオの配列が入っている
-            scenarioIndex,    //シナリオナンバーが入っている
-            myFunctionList,
-            mainLogger,
-            mainDebugLogger
+        // 実行フェーズだけで開始ログを出す（テスト収集フェーズでは出さない）
+        test.beforeAll(() => {
+            if (mainLogger) {
+                mainLogger.info(`=====================================`);
+                mainLogger.info(`${new Date()} テスト実行を開始します`);
+                mainLogger.info(`総シナリオ数=${totalScenarios} 総メンバー数=${totalMembers}`);
+                // シナリオ・関数リストはデバッグ用途
+                mainLogger.debug(`シナリオリスト: ${JSON.stringify(scenarioList)}`);
+                mainLogger.debug(`関数リスト: ${JSON.stringify(functionList)}`);
+            }
         });
-    });
-    
 
+
+        //それぞれのテストシナリオで処理を行う
+        scenarioList.forEach((testScenario, scenarioIndex) => {
+
+            const myFunctionList = functionList[scenarioIndex];
+
+            runScenarioGroup({
+                testScenario,          //テストシナリオの配列が入っている
+                scenarioIndex,    //シナリオナンバーが入っている
+                myFunctionList,
+                mainLogger,
+                debugLogger
+            });
+        });
+    } catch (error) {
+        // TestContentsListFactoryError（testContentsListFactory関数のエラー）
+        if (error instanceof TestContentsListFactoryError) {
+            const errorTypeMsg = error.errorType === 'validation' 
+                ? 'データ検証エラー' 
+                : error.errorType === 'parse' 
+                ? 'JSONパースエラー' 
+                : '予期しないエラー';
+            
+            debugLogger.error(`[${errorTypeMsg}] testContentsListFactory: ${error.message}`);
+            mainLogger.logError(error, 'TestContentsListFactoryError');
+            
+            if (error.errorType === 'validation') {
+                mainLogger.error('\n❌ testContent.json のデータ構造を確認してください');
+                mainLogger.error(`詳細: ${error.message}\n`);
+            }
+            throw error;
+        }
+        
+        // その他の予期しないエラー
+        debugLogger.error(`予期しないエラーが発生しました: ${error}`);
+        mainLogger.logError(error, 'UnexpectedError');
+        mainLogger.error('\n❌ テスト実行の初期化中に予期しないエラーが発生しました');
+        mainLogger.error(`エラー内容: ${error}\n`);
+        throw error;
+    }
+    
 }
 
 
 //テストのシナリオを準備をする関数
-export function runScenarioGroup({testScenario, scenarioIndex, myFunctionList, mainLogger, mainDebugLogger}: TestGroup) {
-
-    // デバッグ用のログファイルがない場合はメインのログファイルに書くようにしている
-    //ただしメインログファイルはINFO以上しか書き込まないためDEBUGログは出力されない
-    const debugLogger = mainDebugLogger ?? mainLogger;
+export function runScenarioGroup({testScenario, scenarioIndex, myFunctionList, mainLogger, debugLogger}: TestGroup) {
 
     // レポートで見やすいように「グループ化」
     // シナリオで1人、一つのファイルにまとめて出してくれる
@@ -147,7 +178,8 @@ export function runUserTest({data, testScenario, myFunctionList}: Test) {
 
                     //テスト起動
                     //テスト情報とこのテストで使う関数のリスト、テストの番号を渡す（何番目のテストなのか）
-                    const result = await strategy.execute(page, data, myFunctionList, testInfo, strategyIndex);
+                    const context: TestExecutionContext = {page, data, functions: myFunctionList, testInfo, strategyIndex};
+                    const result = await strategy.execute(context);
 
                     if (!result) {
                         // 失敗したらエラーを投げる（catchに飛ぶ）

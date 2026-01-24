@@ -1,4 +1,12 @@
-import { Page } from '@playwright/test';
+import { Page, TestInfo } from '@playwright/test';
+
+export type TestExecutionContext = {
+    page: Page;
+    data: import('./userType').User;
+    functions: import('./functionTypes').ScenarioFunctionList;
+    testInfo: TestInfo;
+    strategyIndex: number;
+};
 
 export interface TestStrategy {
 
@@ -6,7 +14,7 @@ export interface TestStrategy {
     stepName: string;
 
     //真偽値を返すことでテストが失敗したときに終了させるようにする
-    execute(page: Page, data: import('./userType').User, functions: import('./functionTypes').ScenarioFunctionList, testInfo: any, strategyIndex: number): Promise<boolean>;
+    execute(context: TestExecutionContext): Promise<boolean>;
 
 }
 

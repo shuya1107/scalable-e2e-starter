@@ -1,19 +1,17 @@
-import { Page } from '@playwright/test';
-import { TestStrategy } from '../../typeList/index';
+import type { TestStrategy, TestExecutionContext } from '../../typeList/index';
 import { testAactions } from './function/functionStrategiesConfig';
 import { TestLogger } from '../../utils/TestLogger';
-import type { User, ScenarioFunctionList } from '../../typeList';
 
 export class MyJavaApp implements TestStrategy {
   
     stepName = '自作アプリ';
 
-    async execute(page: Page, data: User, functions: ScenarioFunctionList, testInfo: any, strategyIndex: number): Promise<boolean> {
+    async execute(context: TestExecutionContext): Promise<boolean> {
         
         //@strategyIndex はテストのシナリオが入っている配列のインデックス番号
-        const index = strategyIndex || 0;
+        const index = context.strategyIndex || 0;
         //　ログファイルを作成　システム名_シナリオ手順番号.log で保存される
-        const logger = new TestLogger(testInfo.outputDir, `${this.stepName}_${index}.log`);
+        const logger = new TestLogger(context.testInfo.outputDir, `${this.stepName}_${index}.log`);
         logger.log(`[開始] シナリオ: ${this.stepName} を開始します`);
 
 
@@ -23,7 +21,7 @@ export class MyJavaApp implements TestStrategy {
         try {
             
             // このMyJavaAppインスタンスに対応する関数リストだけを取得
-            const myFunctions = functions[index];
+            const myFunctions = context.functions[index];
             
             for (const functionName of myFunctions) {
             const actionName = functionName as string;
@@ -38,7 +36,7 @@ export class MyJavaApp implements TestStrategy {
                     throw new Error(`未定義のアクションです: '${actionName}' は登録されていません。`);
                 }
 
-                const ok = await actionFunction(page, data, logger);
+                const ok = await actionFunction(context.page, context.data, logger);
 
                 // アクションが false を返したらテストを失敗にする
                 if (!ok) {

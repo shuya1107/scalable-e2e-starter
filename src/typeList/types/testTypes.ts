@@ -12,7 +12,7 @@ export type TestGroup = {
     scenarioIndex: number;         // シナリオ番号
     myFunctionList: import('./functionTypes').ScenarioFunctionList;
     mainLogger: import('../../utils/TestLogger').TestLogger | null;
-    mainDebugLogger?: import('../../utils/TestLogger').TestLogger | null;
+    debugLogger?: import('../../utils/TestLogger').TestLogger | null;
 };
 
 

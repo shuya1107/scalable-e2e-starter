@@ -23,6 +23,7 @@ export type {
 } from './types/testTypes';
 
 export type {
+    TestExecutionContext,
     TestStrategy,
     TestStrategyRecord
 } from './types/testClassTypes';

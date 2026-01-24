@@ -2,4 +2,5 @@
 export type User = {
     memberCode: string;
     key: string;
+    status: string;
 }
