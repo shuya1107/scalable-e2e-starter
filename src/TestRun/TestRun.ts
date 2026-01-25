@@ -5,7 +5,7 @@ import { createStrategies } from '../factory/testFactory';
 import { TestLogger, formatLogContext } from '../utils/TestLogger';
 import type { LogLevel, User, Test, TestGroup, TestExecutionContext, ScenarioStep, ScenarioFunctionList } from '../typeList/index';
 import { testFunctionListFactory } from '../factory/testFunctionListFactory';
-import { runErrorHandleFactory } from '../error/errorHandler/runHandler';
+import { errorHandleFactory } from '../error/errorHandler/errorHandler';
 
 //テスト実行関数
 export function run() {
@@ -24,12 +24,10 @@ export function run() {
 
     try{
         // テストデータの初期化
-        let scenarioList: ScenarioStep[];
-        let functionList: ScenarioFunctionList[];
-
         //JSONの情報からテストのシナリオと関数をそれぞれ配列にする
-        scenarioList = testContentsListFactory();
-        functionList = testFunctionListFactory();
+        let scenarioList: string[][] = testContentsListFactory();
+        let functionList: ScenarioFunctionList[] = testFunctionListFactory();
+
 
         //全体のシナリオ数と会員数を取得する
         const totalScenarios = scenarioList.length;
@@ -51,10 +49,13 @@ export function run() {
         //それぞれのテストシナリオで処理を行う
         scenarioList.forEach((testScenario, scenarioIndex) => {
 
-            const myFunctionList = functionList[scenarioIndex];
+        const myFunctionList = functionList[scenarioIndex];
+
+        //テストのクラスのオブジェクト作成
+        const testList = createStrategies(testScenario);
 
             runScenarioGroup({
-                testScenario,          //テストシナリオの配列が入っている
+                testList,          //テストシナリオの配列が入っている
                 scenarioIndex,    //シナリオナンバーが入っている
                 myFunctionList,
                 mainLogger,
@@ -63,75 +64,77 @@ export function run() {
         });
     } catch (error) {
         // エラーハンドリング用の関数
-        runErrorHandleFactory(error, mainLogger, debugLogger);
+        errorHandleFactory(error, mainLogger, debugLogger);
     }
     
 }
 
 
 //テストのシナリオを準備をする関数
-export function runScenarioGroup({testScenario, scenarioIndex, myFunctionList, mainLogger, debugLogger}: TestGroup) {
+export function runScenarioGroup({testList, scenarioIndex, myFunctionList, mainLogger, debugLogger}: TestGroup) {
 
-    // レポートで見やすいように「グループ化」
-    // シナリオで1人、一つのファイルにまとめて出してくれる
-    test.describe(`Scenario Group ${scenarioIndex + 1}`, () => {
+    try {
 
-        // 会員の情報をとってくる
-        // JSONは配列の中に配列でできている　シナリオと会員の情報どちらも同じインデックス番号が対応する
-        //　データのチェックのみ
-        const targetUsers = userDataList[scenarioIndex];
+        // レポートで見やすいように「グループ化」
+        // シナリオで1人、一つのファイルにまとめて出してくれる
+        test.describe(`Scenario Group ${scenarioIndex + 1}`, () => {
 
-        //nullの可能性があるためのチェック且つ配列に何人のデータが入っているのかを確認する（テスト予定の会員数）
-        const plannedMembers = (targetUsers && Array.isArray(targetUsers)) ? targetUsers.length : 0;
+            // 会員の情報をとってくる
+            // JSONは配列の中に配列でできている　シナリオと会員の情報どちらも同じインデックス番号が対応する
+            //　データのチェックのみ
+            const targetUsers = userDataList[scenarioIndex];
 
-        // もしシナリオの数より会員の数が少なかった（配列の数）場合スキップして終わらせる。
-        if (!targetUsers) {
-            if(mainLogger){
-                const ctx = formatLogContext({ scenarioIndex });
-                mainLogger.error(`${ctx}異常終了(定義不足): シナリオ番号 ${scenarioIndex + 1} に対応する会員データがありません。`);
-                mainLogger.error(`${ctx}user.json の配列数と testContents.json の配列数を確認してください。`);
+            //nullの可能性があるためのチェック且つ配列に何人のデータが入っているのかを確認する（テスト予定の会員数）
+            const plannedMembers = (targetUsers && Array.isArray(targetUsers)) ? targetUsers.length : 0;
+
+            // もしシナリオの数より会員の数が少なかった（配列の数）場合スキップして終わらせる。
+            if (!targetUsers) {
+                if(mainLogger){
+                    const ctx = formatLogContext({ scenarioIndex });
+                    mainLogger.error(`${ctx}異常終了(定義不足): シナリオ番号 ${scenarioIndex + 1} に対応する会員データがありません。`);
+                    mainLogger.error(`${ctx}user.json の配列数と testContents.json の配列数を確認してください。`);
+                }
+                return;
             }
-            return;
-        }
 
-        // 実行フェーズだけで開始ログを出す
-        test.beforeAll(() => {
-            const ctx = formatLogContext({ scenarioIndex });
-            debugLogger?.debug(`${ctx}runScenarioGroup 開始`);
-            mainLogger?.info(`${ctx}start: members planned=${plannedMembers}`);
-            debugLogger?.debug(`${ctx}members detail: ${JSON.stringify(targetUsers)}`);
-        });
-        
+            
 
-        //テストスタート
-        targetUsers.forEach((data:User) => {
-            //テストシナリオと会員の情報を渡す
-            runUserTest({
-                data,         //会員の情報
-                testScenario,   //シナリオの配列
-                myFunctionList   //関数のリスト
+            // 実行フェーズだけで開始ログを出す
+            test.beforeAll(() => {
+                const ctx = formatLogContext({ scenarioIndex });
+                debugLogger?.debug(`${ctx}runScenarioGroup 開始`);
+                mainLogger?.info(`${ctx}start: members planned=${plannedMembers}`);
+                debugLogger?.debug(`${ctx}members detail: ${JSON.stringify(targetUsers)}`);
+            });
+            
+
+            //テストスタート
+            targetUsers.forEach((data:User) => {
+                //テストシナリオと会員の情報を渡す
+                runUserTest({
+                    data,         //会員の情報
+                    testList,   //シナリオの配列
+                    myFunctionList   //関数のリスト
+                });
+            });
+
+            // シナリオの全テスト完了のログ
+            test.afterAll(() => {
+                const ctx = formatLogContext({ scenarioIndex });
+                mainLogger.info(`${ctx}Scenario Group ${scenarioIndex + 1} 完了`);
+                debugLogger.debug(`${ctx}runScenarioGroup 完了`);
             });
         });
-
-        // シナリオの全テスト完了のログ
-        test.afterAll(() => {
-            const ctx = formatLogContext({ scenarioIndex });
-            if (mainLogger) {
-                
-                mainLogger.info(`${ctx}Scenario Group ${scenarioIndex + 1} 完了`);
-            }
-            debugLogger?.debug(`${ctx}runScenarioGroup 完了`);
-        });
-    });
-
-    
-
+    } catch (error) {
+        // 基本的に予期しないエラーのみ飛んでくる意味がないわけではないと思いたい使われないのが一番良い
+        errorHandleFactory(error, mainLogger, debugLogger);
+    }
 }
 
 
 
 //実際にテストを行う関数
-export function runUserTest({data, testScenario, myFunctionList}: Test) {
+export function runUserTest({data, testList, myFunctionList}: Test) {
 
     // レポート用のタイトルに memberCodeを入れてわかりやすくする
     test(`Test - Member: ${data.memberCode} `, async ({ page }, testInfo) => {
@@ -143,8 +146,7 @@ export function runUserTest({data, testScenario, myFunctionList}: Test) {
             const baseCtx = formatLogContext({ memberCode: data.memberCode });
             logger.info(`${baseCtx}START: Member ${data.memberCode} のテスト開始`);
 
-            //テストのクラスのオブジェクト作成
-            const testList = createStrategies(testScenario);
+            
 
             // テストシナリオを配列の順番通りに進める
             for (let strategyIndex = 0; strategyIndex < testList.length; strategyIndex++) {
@@ -169,7 +171,7 @@ export function runUserTest({data, testScenario, myFunctionList}: Test) {
         } catch (error) {
             logger.logError(error, { memberCode: data.memberCode });
             logger.printFailureLogs(data.memberCode);
-            throw error;
+            throw error; // エラーを再スローしてテストを失敗させる
         }
 
     });

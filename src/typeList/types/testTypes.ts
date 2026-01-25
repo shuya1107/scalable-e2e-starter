@@ -1,18 +1,19 @@
+import { TestStrategy } from './testClassTypes';
 
-export type ScenarioStep = string[];
+export type ScenarioStep = TestStrategy[];
 
 export type Test = {
     data: import('./userType').User;
-    testScenario: ScenarioStep;
+    testList: ScenarioStep;
     myFunctionList: import('./functionTypes').ScenarioFunctionList;
 }
 
 export type TestGroup = {
-    testScenario: ScenarioStep;  // シナリオの配列
+    testList: ScenarioStep;  // シナリオの配列
     scenarioIndex: number;         // シナリオ番号
     myFunctionList: import('./functionTypes').ScenarioFunctionList;
-    mainLogger: import('../../utils/TestLogger').TestLogger | null;
-    debugLogger?: import('../../utils/TestLogger').TestLogger | null;
+    mainLogger: import('../../utils/TestLogger').TestLogger;
+    debugLogger: import('../../utils/TestLogger').TestLogger ;
 };
 
 

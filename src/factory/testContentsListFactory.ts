@@ -1,9 +1,8 @@
 import testContent from '../../testdata/testContent.json';
-import type { ScenarioStep } from '../typeList';
 import { TestContentsListFactoryError } from '../error/errorIndex';
 
 
-export function testContentsListFactory(): ScenarioStep[] {
+export function testContentsListFactory(): string[][] {
 
     try {
         const testScenarios = testContent;
@@ -16,7 +15,7 @@ export function testContentsListFactory(): ScenarioStep[] {
             );
         }
 
-        const scenarioList: ScenarioStep[] = [];  // テストの手順を入れる用
+        const scenarioList: string[][] = [];  // テストの手順を入れる用
 
         for (const group of testScenarios) {
 
