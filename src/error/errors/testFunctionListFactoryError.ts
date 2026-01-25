@@ -1,9 +1,9 @@
 import { BaseFactoryError } from '../errorBaseClass';
 
 /**
- * testContentsListFactory 関数のエラー
+ * testFunctionListFactory 関数のエラー
  */
-export class TestContentsListFactoryError extends BaseFactoryError {
+export class TestFunctionListFactoryError extends BaseFactoryError {
     constructor(
         message: string,
         errorType: 'parse' | 'validation' | 'unknown',
@@ -12,7 +12,7 @@ export class TestContentsListFactoryError extends BaseFactoryError {
         super(
             message, 
             errorType, 
-            'testContentsListFactory', // 関数名はここで固定で渡す
+            'testFunctionListFactory', // 関数名はここで固定で渡す
             originalError
         );
     }

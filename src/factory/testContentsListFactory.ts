@@ -1,6 +1,6 @@
 import testContent from '../../testdata/testContent.json';
 import type { ScenarioStep } from '../typeList';
-import { TestContentsListFactoryError } from '../error/index';
+import { TestContentsListFactoryError } from '../error/errorIndex';
 
 
 export function testContentsListFactory(): ScenarioStep[] {

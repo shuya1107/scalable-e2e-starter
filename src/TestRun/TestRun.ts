@@ -4,8 +4,8 @@ import userDataList from '../../testdata/users.json';
 import { createStrategies } from '../factory/testFactory';
 import { TestLogger, formatLogContext } from '../utils/TestLogger';
 import type { LogLevel, User, Test, TestGroup, TestExecutionContext, ScenarioStep, ScenarioFunctionList } from '../typeList/index';
-import { testFunctinListFactory } from '../factory/testFunctionListFactory';
-import { TestContentsListFactoryError } from '../error/index';
+import { testFunctionListFactory } from '../factory/testFunctionListFactory';
+import { runErrorHandleFactory } from '../error/errorHandler/runHandler';
 
 //テスト実行関数
 export function run() {
@@ -29,7 +29,7 @@ export function run() {
 
         //JSONの情報からテストのシナリオと関数をそれぞれ配列にする
         scenarioList = testContentsListFactory();
-        functionList = testFunctinListFactory();
+        functionList = testFunctionListFactory();
 
         //全体のシナリオ数と会員数を取得する
         const totalScenarios = scenarioList.length;
@@ -62,30 +62,8 @@ export function run() {
             });
         });
     } catch (error) {
-        // TestContentsListFactoryError（testContentsListFactory関数のエラー）
-        if (error instanceof TestContentsListFactoryError) {
-            const errorTypeMsg = error.errorType === 'validation' 
-                ? 'データ検証エラー' 
-                : error.errorType === 'parse' 
-                ? 'JSONパースエラー' 
-                : '予期しないエラー';
-            
-            debugLogger.error(`[${errorTypeMsg}] testContentsListFactory: ${error.message}`);
-            mainLogger.logError(error, 'TestContentsListFactoryError');
-            
-            if (error.errorType === 'validation') {
-                mainLogger.error('\n❌ testContent.json のデータ構造を確認してください');
-                mainLogger.error(`詳細: ${error.message}\n`);
-            }
-            throw error;
-        }
-        
-        // その他の予期しないエラー
-        debugLogger.error(`予期しないエラーが発生しました: ${error}`);
-        mainLogger.logError(error, 'UnexpectedError');
-        mainLogger.error('\n❌ テスト実行の初期化中に予期しないエラーが発生しました');
-        mainLogger.error(`エラー内容: ${error}\n`);
-        throw error;
+        // エラーハンドリング用の関数
+        runErrorHandleFactory(error, mainLogger, debugLogger);
     }
     
 }
