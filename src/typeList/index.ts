@@ -7,7 +7,7 @@ export type { User } from './types/userType';
 // ログ関連（utils/TestLogger.ts）
 export type { LogContext, LogLevel } from './types/logTypes';
 
-// 関数関連
+// テストの具体的な操作の関数関連
 export type { 
     ActionFn, 
     ActionFnMap, 
@@ -15,15 +15,10 @@ export type {
     ScenarioFunctionList 
 } from './types/functionTypes';
 
-// テスト関連
-export type { 
-    ScenarioStep, 
-    Test, 
-    TestGroup 
-} from './types/testTypes';
-
+// テストシナリオ関連
 export type {
     TestExecutionContext,
     TestStrategy,
-    TestStrategyRecord
+    TestStrategyRecord,
+    ScenarioStep
 } from './types/testClassTypes';

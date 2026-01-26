@@ -19,3 +19,6 @@ export interface TestStrategy {
 }
 
 export type  TestStrategyRecord = Record<string, { new(): TestStrategy }>;
+
+//システムごとのクラスが入る配列の型定義
+export type ScenarioStep = TestStrategy[];
