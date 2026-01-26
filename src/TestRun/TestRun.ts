@@ -7,20 +7,19 @@ import userDataList from '../../testdata/users.json';
 import { TestLogger, formatLogContext } from '../utils/TestLogger';
 
 // エラーハンドリング用の関数
+//後でクラス化したほうがいいと思われる
 import { errorHandleFactory } from '../error/errorHandler/errorHandler';
 
 
-import type { LogLevel, User, TestExecutionContext, ScenarioFunctionList } from '../typeList/index';
+import type { LogLevel, User, TestExecutionContext } from '../typeList/index';
 
 // DTOファクトリー関数
-import { runScenarioGroupDtoFactory, runUserTestDtoFactory } from '../dto/dtoFactoryIndex';
+import { runUserTestDtoFactory } from '../dto/dtoFactoryIndex';
 
 // DTOの型定義
 import { RunScenarioGroupDto, RunUserTestDto } from '../dto/dtoIndex';
 
-// ファクトリー関数
-import { testFunctionListFactory, createStrategies, testContentsListFactory } from '../factory/factoryIndex';
-
+import { RunService } from '../service/runService';
 
 /**
  * テスト実行全体を管理する関数
@@ -33,6 +32,9 @@ import { testFunctionListFactory, createStrategies, testContentsListFactory } fr
 
 //テスト実行関数
 export function run() {
+
+    //　後でここも別の場所に移したほうがいいと思われる
+    //　newがここにいるのが美しくない
 
     // 「自分が何番目の作業員か」を確認する。
     const workerIndex = process.env.TEST_WORKER_INDEX ;
@@ -47,56 +49,25 @@ export function run() {
     const debugLogger = mainDebugLogger ?? mainLogger;
 
     try{
-        // テストデータの初期化
-        //JSONの情報からテストのシナリオと関数をそれぞれ配列にする
-        let scenarioList: string[][] = testContentsListFactory();
-        let functionList: ScenarioFunctionList[] = testFunctionListFactory();
 
+        const { dtoList } = RunService.createExecutionData(mainLogger, debugLogger);
 
-        //全体のシナリオ数と会員数を取得する
-        const totalScenarios = scenarioList.length;
-        const totalMembers = userDataList.reduce((sum, users) => sum + ((users && Array.isArray(users)) ? users.length : 0), 0);
-
-        // 実行フェーズだけで開始ログを出す（テスト収集フェーズでは出さない）
-        test.beforeAll(() => {
-            if (mainLogger) {
-                mainLogger.info(`=====================================`);
-                mainLogger.info(`${new Date()} テスト実行を開始します`);
-                mainLogger.info(`総シナリオ数=${totalScenarios} 総メンバー数=${totalMembers}`);
-                // シナリオ・関数リストはデバッグ用途
-                mainLogger.debug(`シナリオリスト: ${JSON.stringify(scenarioList)}`);
-                mainLogger.debug(`関数リスト: ${JSON.stringify(functionList)}`);
-            }
-        });
-
-
-        //それぞれのテストシナリオで処理を行う
-        scenarioList.forEach((testScenario, scenarioIndex) => {
-
-        const myFunctionList = functionList[scenarioIndex];
-
-        //テストのクラスのオブジェクト作成
-        const testList = createStrategies(testScenario);
-
-        //RunScenarioGroupDtoのオブジェクトを作成
-        const runScenarioGroupDto: RunScenarioGroupDto = runScenarioGroupDtoFactory({
-            testList,          //テストシナリオの配列が入っている
-            scenarioIndex,    //シナリオナンバーが入っている
-            myFunctionList,
-            mainLogger,
-            debugLogger
-        });
-
+        // DTOリストをもとにテストシナリオグループを順番に実行していく
+        for (const runScenarioGroupDto of dtoList) {
+        
             runScenarioGroup(
                 runScenarioGroupDto
             );
-        });
+
+        }
     } catch (error) {
         // エラーハンドリング用の関数
         errorHandleFactory(error, mainLogger, debugLogger);
     }
     
 }
+
+//次はここからサービスを作る予定
 
 
 //テストのシナリオを準備をする関数
