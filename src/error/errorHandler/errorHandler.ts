@@ -1,5 +1,5 @@
 import type { TestLogger } from '../../utils/TestLogger';
-import { BaseFactoryError } from '../errorBaseClass';
+import { BaseError } from '../errorBaseClass';
 
 export function errorHandleFactory(
     error: unknown,
@@ -7,7 +7,7 @@ export function errorHandleFactory(
     debugLogger: TestLogger,
     originalError?: unknown
 ): never {
-    if (error instanceof BaseFactoryError) {
+    if (error instanceof BaseError) {
         const errorTypeMsg = error.errorType === 'validation' 
             ? 'データ検証エラー' 
             : error.errorType === 'parse' 

@@ -1,6 +1,6 @@
 
 //　エラークラスの親クラス
-export abstract class BaseFactoryError extends Error {
+export abstract class BaseError extends Error {
     constructor(
         public message: string,
         public errorType: string, // エラーの種類を示す文字列

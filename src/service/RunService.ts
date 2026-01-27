@@ -21,7 +21,16 @@ import { testFunctionListFactory, createStrategies, testContentsListFactory } fr
 
 export class RunService {
 
-    static createExecutionData(mainLogger: TestLogger, debugLogger: TestLogger) {
+    private mainLogger: TestLogger;
+    private debugLogger: TestLogger;
+
+    constructor(mainLogger: TestLogger, debugLogger: TestLogger) {
+        this.mainLogger = mainLogger;
+        this.debugLogger = debugLogger;
+    }
+
+
+    createExecutionData() {
         
         // テストデータの初期化
         //JSONの情報からテストのシナリオと関数をそれぞれ配列にする
@@ -29,10 +38,10 @@ export class RunService {
 
 
         // 実行フェーズだけで開始ログを出す
-        this.startLog(mainLogger, scenarioList, functionList);
+        this.startLog(scenarioList, functionList);
         
         //DTOリストの作成
-        const dtoList: RunScenarioGroupDto[] = this.createDtoList(scenarioList, functionList, mainLogger, debugLogger);
+        const dtoList: RunScenarioGroupDto[] = this.createDtoList(scenarioList, functionList);
 
         //DTOリストの返却
         return { dtoList };
@@ -41,14 +50,14 @@ export class RunService {
 
     // テストデータの初期化
     //JSONの情報からテストのシナリオと関数をそれぞれ配列にする
-    static testDataList() {
+    testDataList() {
         const scenarioList: string[][] = testContentsListFactory();
         const functionList: ScenarioFunctionList[] = testFunctionListFactory();
         return { scenarioList, functionList };
     }
 
     // 実行フェーズだけで開始ログを出す
-    static startLog(mainLogger: TestLogger, scenarioList: string[][], functionList: ScenarioFunctionList[]) {
+    startLog(scenarioList: string[][], functionList: ScenarioFunctionList[]) {
 
         //全体のシナリオ数と会員数を取得する
         //ログ表示用
@@ -58,19 +67,19 @@ export class RunService {
         
         // 実行フェーズだけで開始ログを出す（テスト収集フェーズでは出さない）
         test.beforeAll(() => {
-            if (mainLogger) {
-                mainLogger.info(`=====================================`);
-                mainLogger.info(`${new Date()} テスト実行を開始します`);
-                mainLogger.info(`総シナリオ数=${totalScenarios} 総メンバー数=${totalMembers}`);
+            if (this.mainLogger) {
+                this.mainLogger.info(`=====================================`);
+                this.mainLogger.info(`${new Date()} テスト実行を開始します`);
+                this.mainLogger.info(`総シナリオ数=${totalScenarios} 総メンバー数=${totalMembers}`);
                 // シナリオ・関数リストはデバッグ用途
-                mainLogger.debug(`シナリオリスト: ${JSON.stringify(scenarioList)}`);
-                mainLogger.debug(`関数リスト: ${JSON.stringify(functionList)}`);
+                this.debugLogger.debug(`シナリオリスト: ${JSON.stringify(scenarioList)}`);
+                this.debugLogger.debug(`関数リスト: ${JSON.stringify(functionList)}`);
             }
         });
     }
 
     //DTOリストの作成
-    static createDtoList(scenarioList: string[][], functionList: ScenarioFunctionList[], mainLogger: TestLogger, debugLogger: TestLogger) {
+    createDtoList(scenarioList: string[][], functionList: ScenarioFunctionList[]) {
         return scenarioList.map((testScenario, scenarioIndex) => {
             const myFunctionList = functionList[scenarioIndex];
 
@@ -82,8 +91,8 @@ export class RunService {
                 testList,
                 scenarioIndex,
                 myFunctionList,
-                mainLogger,
-                debugLogger
+                mainLogger: this.mainLogger,
+                debugLogger: this.debugLogger
             }); 
         });
     }

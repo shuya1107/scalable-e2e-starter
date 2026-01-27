@@ -1,9 +1,9 @@
-import { BaseFactoryError } from '../errorBaseClass';
+import { BaseError } from '../errorBaseClass';
 
 /**
  * createStrategies 関数のエラー
  */
-export class CreateStrategiesError extends BaseFactoryError {
+export class CreateStrategiesError extends BaseError {
     constructor(
         message: string,
         errorType: 'parse' | 'validation' | 'unknown',

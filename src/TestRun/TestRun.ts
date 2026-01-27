@@ -1,8 +1,5 @@
 import { test } from '@playwright/test';
 
-// テストデータのインポート
-import userDataList from '../../testdata/users.json';
-
 // ログ出力用のクラスと関数
 import { TestLogger, formatLogContext } from '../utils/TestLogger';
 
@@ -11,15 +8,14 @@ import { TestLogger, formatLogContext } from '../utils/TestLogger';
 import { errorHandleFactory } from '../error/errorHandler/errorHandler';
 
 
-import type { LogLevel, User, TestExecutionContext } from '../typeList/index';
+import type { LogLevel, TestExecutionContext } from '../typeList/index';
 
-// DTOファクトリー関数
-import { runUserTestDtoFactory } from '../dto/dtoFactoryIndex';
+import { runScenarioGroupServiceFactory, runServiceFactory } from '../service/factory/serviceFactoryIndex';
 
 // DTOの型定義
-import { RunScenarioGroupDto, RunUserTestDto } from '../dto/dtoIndex';
+import { RunUserTestDto } from '../dto/dtoIndex';
 
-import { RunService } from '../service/runService';
+
 
 /**
  * テスト実行全体を管理する関数
@@ -50,13 +46,18 @@ export function run() {
 
     try{
 
-        const { dtoList } = RunService.createExecutionData(mainLogger, debugLogger);
+        const runService = runServiceFactory(mainLogger, debugLogger);
+
+        const { dtoList } = runService.createExecutionData();
 
         // DTOリストをもとにテストシナリオグループを順番に実行していく
         for (const runScenarioGroupDto of dtoList) {
+
+            //シナリオの数だけサービスを作成（ループの数）
+            const runScenarioGroupService = runScenarioGroupServiceFactory(runScenarioGroupDto);
         
             runScenarioGroup(
-                runScenarioGroupDto
+                runScenarioGroupService
             );
 
         }
@@ -71,68 +72,28 @@ export function run() {
 
 
 //テストのシナリオを準備をする関数
-export function runScenarioGroup(runScenarioGroupDto: RunScenarioGroupDto) {
+//関数の戻り値の型をこの引数の型とするという推論
+export function runScenarioGroup(runScenarioGroupService: ReturnType<typeof runScenarioGroupServiceFactory>) {
 
     try {
 
         // レポートで見やすいように「グループ化」
         // シナリオで1人、一つのファイルにまとめて出してくれる
-        test.describe(`Scenario Group ${runScenarioGroupDto.scenarioIndex + 1}`, () => {
+        test.describe(`Scenario Group ${runScenarioGroupService.scenarioIndex + 1}`, () => {
 
-            // 会員の情報をとってくる
-            // JSONは配列の中に配列でできている　シナリオと会員の情報どちらも同じインデックス番号が対応する
-            //　データのチェックのみ
-            const targetUsers = userDataList[runScenarioGroupDto.scenarioIndex];
+            const { runUserDto } = runScenarioGroupService.createScenarioGroup();
 
-            //nullの可能性があるためのチェック且つ配列に何人のデータが入っているのかを確認する（テスト予定の会員数）
-            const plannedMembers = (targetUsers && Array.isArray(targetUsers)) ? targetUsers.length : 0;
-
-            // もしシナリオの数より会員の数が少なかった（配列の数）場合スキップして終わらせる。
-            if (!targetUsers) {
-                if(runScenarioGroupDto.mainLogger){
-                    const ctx = formatLogContext({ scenarioIndex: runScenarioGroupDto.scenarioIndex });
-                    runScenarioGroupDto.mainLogger.error(`${ctx}異常終了(定義不足): シナリオ番号 ${runScenarioGroupDto.scenarioIndex + 1} に対応する会員データがありません。`);
-                    runScenarioGroupDto.mainLogger.error(`${ctx}user.json の配列数と testContents.json の配列数を確認してください。`);
-                }
-                return;
-            }
-
-            
-
-            // 実行フェーズだけで開始ログを出す
-            test.beforeAll(() => {
-                const ctx = formatLogContext({ scenarioIndex: runScenarioGroupDto.scenarioIndex });
-                runScenarioGroupDto.debugLogger?.debug(`${ctx}runScenarioGroup 開始`);
-                runScenarioGroupDto.mainLogger?.info(`${ctx}start: members planned=${plannedMembers}`);
-                runScenarioGroupDto.debugLogger?.debug(`${ctx}members detail: ${JSON.stringify(targetUsers)}`);
-            });
-            
-
-            //テストスタート
-            targetUsers.forEach((data:User) => {
-
-                const runUserTestDto: RunUserTestDto = runUserTestDtoFactory({
-                    data,   //会員の情報
-                    testList: runScenarioGroupDto.testList,   //シナリオの配列
-                    myFunctionList: runScenarioGroupDto.myFunctionList   //関数のリスト
-                });
-
+            for (const runUserTestDto of runUserDto) {
                 //テストシナリオと会員の情報を渡す
                 runUserTest(
                     runUserTestDto
                 );
-            });
-
-            // シナリオの全テスト完了のログ
-            test.afterAll(() => {
-                const ctx = formatLogContext({ scenarioIndex: runScenarioGroupDto.scenarioIndex });
-                runScenarioGroupDto.mainLogger.info(`${ctx}Scenario Group ${runScenarioGroupDto.scenarioIndex + 1} 完了`);
-                runScenarioGroupDto.debugLogger.debug(`${ctx}runScenarioGroup 完了`);
-            });
+            }
+            
         });
     } catch (error) {
         // 基本的に予期しないエラーのみ飛んでくる意味がないわけではないと思いたい使われないのが一番良い
-        errorHandleFactory(error, runScenarioGroupDto.mainLogger, runScenarioGroupDto.debugLogger);
+        errorHandleFactory(error, runScenarioGroupService.mainLogger, runScenarioGroupService.debugLogger);
     }
 }
 

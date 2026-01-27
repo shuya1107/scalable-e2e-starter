@@ -15,3 +15,7 @@ export {
 export {
     CreateStrategiesError
 } from './errors/createStrategiesError';
+
+export {
+    RunScenarioGroupServiceError
+} from './errors/runScenarioGroupServiceError';
