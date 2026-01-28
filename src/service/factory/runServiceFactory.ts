@@ -1,7 +1,6 @@
 import { RunService } from '../RunService';
-import { TestLogger } from '../../utils/TestLogger';
 
-export function runServiceFactory(mainLogger: TestLogger, debugLogger: TestLogger) {
-    const runService = new RunService(mainLogger, debugLogger);
+export function runServiceFactory() {
+    const runService = new RunService();
     return runService;
 }

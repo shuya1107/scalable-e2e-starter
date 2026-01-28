@@ -6,3 +6,7 @@ export {
 export {
     runServiceFactory
 } from './runServiceFactory';
+
+export {
+    runUserTestServiceFactory 
+} from './runUserTestServiceFactory';

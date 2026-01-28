@@ -7,7 +7,7 @@ import userDataList from '../../testdata/users.json';
 import { TestLogger } from '../utils/TestLogger';
 
 // 型定義
-import type { ScenarioFunctionList, TestStrategy } from '../typeList/index';
+import type { ScenarioFunctionList, TestStrategy, LogLevel } from '../typeList/index';
 
 // DTOファクトリー関数
 import { runScenarioGroupDtoFactory } from '../dto/dtoFactoryIndex';
@@ -24,23 +24,75 @@ export class RunService {
     private mainLogger: TestLogger;
     private debugLogger: TestLogger;
 
-    constructor(mainLogger: TestLogger, debugLogger: TestLogger) {
-        this.mainLogger = mainLogger;
-        this.debugLogger = debugLogger;
+    get mainLoggerInstance() {
+        return this.mainLogger;
     }
 
+    get debugLoggerInstance() {
+        return this.debugLogger;
+    }
+
+    constructor() {
+
+        // 「自分が何番目の作業員か」を確認する。
+        const workerIndex = process.env.TEST_WORKER_INDEX ;
+    
+        const logLevel = (process.env.LOG_LEVEL as LogLevel) || 'info';
+        const workerTag = (workerIndex ?? '0').toString(); // Playwrightが未設定のときは0扱いにする
+        const mainLogger = new TestLogger("./logs", `System.worker-${workerTag}.log`, logLevel);
+        const mainDebugLogger = new TestLogger("./logs", `System.worker-${workerTag}.debug.log`, 'debug');
+    
+        // デバッグ用のログファイルがない場合はメインのログファイルに書くようにしている
+        //ただしメインログファイルはINFO以上しか書き込まないためDEBUGログは出力されない
+        const debugLogger = mainDebugLogger ?? mainLogger;
+        this.mainLogger = mainLogger;
+        this.debugLogger = debugLogger;
+
+    }
 
     createExecutionData() {
         
-        // テストデータの初期化
-        //JSONの情報からテストのシナリオと関数をそれぞれ配列にする
+        /**
+         * テストデータの初期化
+         * JSONの情報からテストのシナリオと関数をそれぞれ配列にする
+         * 
+         * [
+         *  [testA,testB], 
+         *  [testA]
+         * ] 
+         * 
+         * シナリオ内で複数のシステムを使う場合システムに対応したクラス名の配列が入る
+         * シナリオ1　と　シナリオ2
+         * 
+         * [
+         *  [
+         *      ["open", "search"],  testAで使う関数の配列
+         *      ["open"]　　　　　　　testBで使う関数の配列
+         *  ],
+         *  [
+         *      ["open","search"]    testAで使う関数の配列
+         *  ]
+         * ]
+         */
         const { scenarioList, functionList } = this.testDataList();
 
 
         // 実行フェーズだけで開始ログを出す
         this.startLog(scenarioList, functionList);
         
-        //DTOリストの作成
+
+        /**
+         * DTOリストの作成
+         * [
+         *  [  シナリオ1　の配列
+         *    dto[testA,open,search,..],　システム1つ目の内容
+         *    dto[testB,open,...]　　　　　　システム2つ目の内容
+         *  ],
+         *  [　シナリオ2　の配列
+         *   dto[testA,open,search,....]　　　システム1つ目の内容
+         *  ]
+         * ]
+         */
         const dtoList: RunScenarioGroupDto[] = this.createDtoList(scenarioList, functionList);
 
         //DTOリストの返却

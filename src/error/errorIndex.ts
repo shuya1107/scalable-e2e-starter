@@ -19,3 +19,7 @@ export {
 export {
     RunScenarioGroupServiceError
 } from './errors/runScenarioGroupServiceError';
+
+export {
+    RunError
+} from './errors/runError';
