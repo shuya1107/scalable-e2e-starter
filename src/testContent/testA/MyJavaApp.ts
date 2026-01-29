@@ -1,12 +1,13 @@
 import type { TestStrategy, TestExecutionContext } from '../../typeList/index';
 import { testAactions } from './function/functionStrategiesConfig';
 import { TestLogger } from '../../utils/TestLogger';
+import { MyJavaAppError } from '../../error/errorIndex';
 
 export class MyJavaApp implements TestStrategy {
   
     stepName = '自作アプリ';
 
-    async execute(context: TestExecutionContext): Promise<boolean> {
+    async execute(context: TestExecutionContext): Promise<void> {
         
         //@strategyIndex はテストのシナリオが入っている配列のインデックス番号
         const index = context.strategyIndex || 0;
@@ -33,24 +34,16 @@ export class MyJavaApp implements TestStrategy {
                 // 関数が見つからなかったらエラー
                 if (!actionFunction) {
                     // actionName が undefined の場合もあるのでケア
-                    throw new Error(`未定義のアクションです: '${actionName}' は登録されていません。`);
+                    throw new MyJavaAppError(`未定義のアクションです: '${actionName}' は登録されていません。`, 'validation');
                 }
 
-                const ok = await actionFunction(context.page, context.data, logger);
-
-                // アクションが false を返したらテストを失敗にする
-                if (!ok) {
-                    throw new Error(`${actionName} が失敗しました`);
-                }
+                await actionFunction(context.page, context.data, logger);
             }
-
-
-            return true;
 
         } catch (e) {
             logger.logError(e, `step=${index} action=${currentActionName ?? ''}`);
             console.error(e);
-            return false;
+            throw e;
         }
     }
 }

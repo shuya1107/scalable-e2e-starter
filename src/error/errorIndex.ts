@@ -21,5 +21,9 @@ export {
 } from './errors/runScenarioGroupServiceError';
 
 export {
+    MyJavaAppError
+} from './errors/MyJavaAppError';
+
+export {
     RunError
 } from './errors/runError';

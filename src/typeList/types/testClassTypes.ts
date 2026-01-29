@@ -14,7 +14,7 @@ export interface TestStrategy {
     stepName: string;
 
     //真偽値を返すことでテストが失敗したときに終了させるようにする
-    execute(context: TestExecutionContext): Promise<boolean>;
+    execute(context: TestExecutionContext): Promise<void>;
 
 }
 

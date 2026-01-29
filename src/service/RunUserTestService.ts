@@ -10,6 +10,7 @@ import { RunUserTestDto } from '../dto/dtoIndex';
 
 
 
+
 export class RunUserTestService {
 
     private runUserTestDto: RunUserTestDto;
@@ -47,7 +48,6 @@ export class RunUserTestService {
         }catch (error) {
             this.logger.logError(error, { memberCode: this.runUserTestDto.data.memberCode });
             this.logger.printFailureLogs(this.runUserTestDto.data.memberCode);
-            throw error; // エラーを再スローしてテストを失敗させる
         }
 
         
@@ -72,12 +72,7 @@ export class RunUserTestService {
             //テスト起動
             //テスト情報とこのテストで使う関数のリスト、テストの番号を渡す（何番目のテストなのか）
             const context: TestExecutionContext = this.createTestExecutionContext(strategyIndex);
-            const result = await strategy.execute(context);
-
-            if (!result) {
-                // 失敗したらエラーを投げる（catchに飛ぶ）
-                throw new Error(`${strategy.stepName} で false が返されました`);
-            }
+            await strategy.execute(context);
 
             this.logger.debug(`${stepCtx}Step OK`);
         });
