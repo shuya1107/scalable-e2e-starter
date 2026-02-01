@@ -6,10 +6,10 @@ import { Page } from '@playwright/test';
 export type ActionFn = (page: Page, data: import('./userType').User, logger: import('../../utils/TestLogger').TestLogger) => Promise<void>;
 
 // 関数名をキーとして ActionFn を値に持つレコード型
-export type ActionFnMap = Record<string, ActionFn>;
+export type ActionFnMap<T> = Record<string, T>;
 
 // テストで使う関数名の配列（例: ["open", "search"]）
 export type FunctionNameList = string[];
 
-// 1つのシナリオグループで使う関数リスト（例: [["open", "search"], ["open"]]）
+// 1つのシナリオグループで使う関数リスト（例: [["open", "search"], ["open"]])
 export type ScenarioFunctionList = FunctionNameList[];

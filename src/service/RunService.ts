@@ -57,8 +57,8 @@ export class RunService {
          * JSONの情報からテストのシナリオと関数をそれぞれ配列にする
          * 
          * [
-         *  [testA,testB], 
-         *  [testA]
+         *  [TestA, testB], 
+         *  [TestA]
          * ] 
          * 
          * シナリオ内で複数のシステムを使う場合システムに対応したクラス名の配列が入る
@@ -66,11 +66,11 @@ export class RunService {
          * 
          * [
          *  [
-         *      ["open", "search"],  testAで使う関数の配列
+         *      ["open", "search"],  TestAで使う関数の配列
          *      ["open"]　　　　　　　testBで使う関数の配列
          *  ],
          *  [
-         *      ["open","search"]    testAで使う関数の配列
+         *      ["open","search"]    TestAで使う関数の配列
          *  ]
          * ]
          */
@@ -85,11 +85,11 @@ export class RunService {
          * DTOリストの作成
          * [
          *  [  シナリオ1　の配列
-         *    dto[testA,open,search,..],　システム1つ目の内容
+         *    dto[TestA,open,search,..],　システム1つ目の内容
          *    dto[testB,open,...]　　　　　　システム2つ目の内容
          *  ],
          *  [　シナリオ2　の配列
-         *   dto[testA,open,search,....]　　　システム1つ目の内容
+         *   dto[TestA,open,search,....]　　　システム1つ目の内容
          *  ]
          * ]
          */

@@ -1,14 +1,14 @@
 [
   [
     {
-      "test": "MyJavaApp",
+      "test": "TestA",
       "scenario": {
         "scenario1": "open",
         "scenario2": "search"
       }
     },
     {
-      "test": "MyJavaApp",
+      "test": "TestA",
       "scenario": {
         "scenario1": "open"
       }
@@ -16,7 +16,7 @@
   ],
   [
     {
-      "test": "MyJavaApp",
+      "test": "TestA",
       "scenario": {
         "scenario1": "open",
         "scenario2": "search"

@@ -18,7 +18,7 @@ import { RunUserTestDto } from '../dto/dtoIndex';
  * [
  *   // シナリオグループ1
  *   RunScenarioGroupDto {
- *     testList: [MyJavaAppインスタンス, MyJavaAppインスタンス],  // 2つのテスト手順
+ *     testList: [TestAインスタンス, TestAインスタンス],  // 2つのテスト手順
  *     scenarioIndex: 0,
  *     myFunctionList: [["open", "search"], ["open"]],  // 各テストで使う関数リスト
  *     mainLogger: TestLogger,
@@ -27,7 +27,7 @@ import { RunUserTestDto } from '../dto/dtoIndex';
  * 
  *   // シナリオグループ2
  *   RunScenarioGroupDto {
- *     testList: [MyJavaAppインスタンス],  // 1つのテスト手順
+ *     testList: [TestAインスタンス],  // 1つのテスト手順
  *     scenarioIndex: 1,
  *     myFunctionList: [["open", "search"]],
  *     mainLogger: TestLogger,
@@ -39,7 +39,7 @@ import { RunUserTestDto } from '../dto/dtoIndex';
  * 
  * @runScenarioGroupDto - 1つのシナリオグループのDTO
  * RunScenarioGroupDto {
- *   testList: [MyJavaAppインスタンス, MyJavaAppインスタンス],
+ *   testList: [TestAインスタンス, TestAインスタンス],
  *   scenarioIndex: 0,
  *   myFunctionList: [["open", "search"], ["open"]],
  *   mainLogger: TestLogger,
@@ -84,19 +84,19 @@ export function run() {
  *   // 1人目 (M009)
  *   RunUserTestDto {
  *     data: { memberCode: "M009", key: "LOGIN_STANDARD", status: "active" },
- *     testList: [MyJavaAppインスタンス, MyJavaAppインスタンス],  // ["MyJavaApp", "MyJavaApp"]から生成
+ *     testList: [TestAインスタンス, TestAインスタンス],  // ["TestA", "TestA"]から生成
  *     myFunctionList: [["open", "search"], ["open"]]  // 各テストで実行する関数リスト
  *   },
  *   // 2人目 (M022)
  *   RunUserTestDto {
  *     data: { memberCode: "M022", key: "LOGIN_ERROR", status: "locked" },
- *     testList: [MyJavaAppインスタンス, MyJavaAppインスタンス],
+ *     testList: [TestAインスタンス, TestAインスタンス],
  *     myFunctionList: [["open", "search"], ["open"]]
  *   },
  *   // 3人目 (M939)
  *   RunUserTestDto {
  *     data: { memberCode: "M939", key: "ADMIN_ACCESS", status: "admin" },
- *     testList: [MyJavaAppインスタンス, MyJavaAppインスタンス],
+ *     testList: [TestAインスタンス, TestAインスタンス],
  *     myFunctionList: [["open", "search"], ["open"]]
  *   }
  * ]

@@ -31,7 +31,7 @@ export function testContentsListFactory(): string[][] {
             
             for (const step of group) {
                 //ここでstepはこれ
-                //{ "test": "MyJavaApp", "scenario": {...} }
+                //{ "test": "TestA", "scenario": {...} }
                 
                 // データ検証: stepにtestプロパティがあるかチェック
                 if (!step.test || typeof step.test !== 'string') {
@@ -48,10 +48,10 @@ export function testContentsListFactory(): string[][] {
 
             //[
             //    1つ目のテスト（グループ）の配列（１ループ目でできる）
-            //   [ "MyJavaApp", "MyJavaApp" ], 
+            //   [ "TestA", "TestA" ], 
             
             //    2つ目のテスト（グループ）の配列（２ループ目でできる）
-            //   [ "MyJavaApp" ]
+            //   [ "TestA" ]
             // ]
             //こんな感じの配列　テストケース一つで配列が1つ中にできる想定
             scenarioList.push(tests);

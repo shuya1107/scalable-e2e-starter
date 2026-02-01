@@ -2,13 +2,34 @@
   "name": "my-playwright-home",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "playwright test",
+    "test:unit": "vitest",
+    "test:unit:ui": "vitest --ui",
+    "test:unit:coverage": "vitest --coverage",
+    "test:e2e": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report",
+    "report:open": "playwright show-report",
+    "test:chromium": "playwright test --project=chromium"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
     "@playwright/test": "^1.57.0",
-    "@types/node": "^25.0.2"
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.0.2",
+    "@types/socket.io": "^3.0.1",
+    "tsx": "^4.21.0",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "csv-parse": "^6.1.0",
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
   }
 }

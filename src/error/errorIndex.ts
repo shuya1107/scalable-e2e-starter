@@ -18,12 +18,12 @@ export {
 
 export {
     RunScenarioGroupServiceError
-} from './errors/runScenarioGroupServiceError';
+} from './errors/RunScenarioGroupServiceError';
 
 export {
-    MyJavaAppError
-} from './errors/MyJavaAppError';
+    TestAError
+} from './errors/TestAError';
 
 export {
     RunError
-} from './errors/runError';
+} from './errors/RunError';

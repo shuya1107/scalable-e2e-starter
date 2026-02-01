@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="top-bar">
+        <div class="brand">
+            <i class="fas fa-robot"></i> Test Monitor
+        </div>
+        <div class="stats-container">
+            <div class="stat-item">Total: <span id="stat-total">0</span></div>
+            <div class="stat-item success">OK: <span id="stat-pass">0</span></div>
+            <div class="stat-item error">NG: <span id="stat-fail">0</span></div>
+        </div>
+        <div id="connection-status" class="status-badge">Connecting...</div>
+    </header>
+
+    <main class="log-container">
+        <div class="log-header">
+            <div class="col-time">TIME</div>
+            <div class="col-id">ID</div>
+            <div class="col-status">STATUS</div>
+            <div class="col-msg">MESSAGE</div>
+            <div class="col-link">TRACE</div>
+        </div>
+
+        <div id="log-list" class="log-list">
+            </div>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -2,6 +2,9 @@ import { test } from '@playwright/test';
 
 import { run } from '../src/TestRun/TestRun';
 
+// テストレポートの初期化
+import { TestReport } from '../src/report/TestReport';
+
 
 //コンフィグファイルに設定しても動画をとってくれないため起動ファイルに直書きしてます。
 test.use({
@@ -14,7 +17,13 @@ test.use({
         size: { width: 1920, height: 1080 }
     },
     
-    trace: 'on',
+    //trace: 'on',
+});
+
+
+test.beforeAll(() => {
+    // レポートの初期化（ファイルの作成）
+    TestReport.initialize();
 });
 
 run();

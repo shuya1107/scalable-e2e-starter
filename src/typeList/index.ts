@@ -22,3 +22,16 @@ export type {
     TestStrategyRecord,
     ScenarioStep
 } from './types/testClassTypes';
+
+// 各テスト固有の関数型定義
+export type {
+    TestAFunction
+} from './types/testFunctionClassify';
+
+
+// テスト結果レポート関連
+export type {
+    TestStatus,
+    TestResultData
+} from './types/testReport';
+

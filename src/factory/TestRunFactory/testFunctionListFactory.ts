@@ -20,7 +20,7 @@ export function testFunctionListFactory(): ScenarioFunctionList[] {
 
         for (const group of testScenarios) {
             // ここで group はこれ
-            // [ { "test1": "MyJavaApp", "scenario": {...} }, { "test2":... } ]
+            // [ { "test1": "TestA", "scenario": {...} }, { "test2":... } ]
             //JSONの配列一つを取り出す
 
             // データ検証: groupが配列かチェック

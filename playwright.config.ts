@@ -12,14 +12,14 @@ export default defineConfig({
   //CI（本番環境）では2回試す（失敗した場合）ローカルは一回だけ行い失敗したらテスト失敗
 
   workers: process.env.CI ? 1 : 1,
-  //ブラウザを何個同時に開くかCI（本番環境）では１つローカル環境では自動で最大
+  //ブラウザを何個同時に開くかCI（本番環境）では１つ、ローカルは6に固定
 
   reporter: 'html',
   //終わった後にHTMLでレポートを出力
   use: {
     video: 'on',
 
-    trace: 'on',
+    //trace: 'on',
   },
   projects: [
     {
