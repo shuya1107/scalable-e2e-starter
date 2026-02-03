@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // ★変更点：ここが index.ts (../types) からの一括インポートになりました
-import { TestStatus, TestResultData } from '../typeList/index';
+import { TestStatus, TestResultData, User } from '../typeList/index';
 
 export class TestReport {
     // 保存先のパス（プロジェクト直下の execution_report.csv）
@@ -15,14 +15,12 @@ export class TestReport {
      * コンストラクタ：テスト開始時に呼ばれる
      * 誰の、どのシナリオかを確定させる
      */
-    constructor(scenarioId: string, memberCode: string, memberAttributes: any) {
+    constructor(memberAttributes: User) {
         this.startTime = Date.now();
         
         // 初期状態をセット
         this.data = {
             timestamp: new Date().toLocaleTimeString('ja-JP'),
-            scenarioId,
-            memberCode,
             memberAttributes,
             status: 'FAIL', // デフォルトはFAILにしておく（途中で落ちた場合のため）
             message: '',
@@ -41,7 +39,7 @@ export class TestReport {
             }
 
             // 見出し行を書き込む（BOM付き）
-            const header = '実行日時,シナリオID,会員コード,属性,ステータス,メッセージ,処理時間(秒),トレースパス\n';
+            const header = '実行日時,会員コード,属性,ステータス,メッセージ,処理時間(秒),トレースパス\n';
             fs.writeFileSync(this.filePath, '\uFEFF' + header);
             
             console.log('📝 レポートファイルを初期化しました');
@@ -77,19 +75,20 @@ export class TestReport {
         try {
             fs.appendFileSync(TestReport.filePath, line);
         } catch (e) {
-            console.error(`レポート書き込み失敗 (${this.data.memberCode}):`, e);
+            console.error(`レポート書き込み失敗 (${this.data.memberAttributes.memberCode}):`, e);
         }
     }
 
     // 内部用：CSV用に整形する（カンマや改行のエスケープ処理）
     private formatToCsv(): string {
-        const { timestamp, scenarioId, memberCode, memberAttributes, status, message, durationSeconds, tracePath } = this.data;
+        const { timestamp, memberAttributes, status, message, durationSeconds, tracePath } = this.data;
+        const memberCode = memberAttributes?.memberCode ?? '';
 
         // JSONやメッセージ内の特殊文字を処理 (CSV崩れ防止)
         const safeAttr = JSON.stringify(memberAttributes).replace(/"/g, '""');
         const safeMsg = message.replace(/\r?\n/g, ' ').replace(/"/g, '""');
 
         // CSVフォーマットで結合
-        return `${timestamp},${scenarioId},${memberCode},"${safeAttr}",${status},"${safeMsg}",${durationSeconds},${tracePath || ''}\n`;
+        return `${timestamp},${memberCode},"${safeAttr}",${status},"${safeMsg}",${durationSeconds},${tracePath || ''}\n`;
     }
 }

@@ -1,4 +1,4 @@
-import { BaseError } from '../errorBaseClass';
+import { BaseError } from '../BaseError';
 
 /**
  * TestA関連のエラー

@@ -1,4 +1,4 @@
-import { BaseError } from '../errorBaseClass';
+import { BaseError } from '../BaseError';
 
 /**
  * RunScenarioGroupService関連のエラー

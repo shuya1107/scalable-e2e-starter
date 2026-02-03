@@ -1,4 +1,4 @@
-import { BaseError } from '../errorBaseClass';
+import { BaseError } from '../BaseError';
 
 /**
  * createStrategies 関数のエラー

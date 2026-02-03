@@ -1,7 +1,7 @@
 import type { TestStrategy, TestExecutionContext } from '../../typeList/index';
 import { testAactions } from './function/testAFunctionStrategiesConfig';
 import { TestLogger } from '../../utils/TestLogger';
-import { TestAError } from '../../error/errorIndex';
+import { TestAError } from '../../error/systemErrorIndex';
 
 export class TestA implements TestStrategy {
   

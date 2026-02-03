@@ -1,6 +1,6 @@
 import testContent from '../../../testdata/testContent.json';
 import type { ScenarioFunctionList } from '../../typeList';
-import { TestFunctionListFactoryError } from '../../error/errorIndex';
+import { TestFunctionListFactoryError } from '../../error/systemErrorIndex';
 
 
 export function testFunctionListFactory(): ScenarioFunctionList[] {

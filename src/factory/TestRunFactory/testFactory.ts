@@ -1,6 +1,6 @@
 import type { TestStrategy } from "../../typeList";
 import { strategyRecord } from "../../strategiesConfig/strategyRecord";
-import { CreateStrategiesError } from "../../error/errorIndex";
+import { CreateStrategiesError } from "../../error/systemErrorIndex";
 
 
 

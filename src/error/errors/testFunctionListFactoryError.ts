@@ -1,4 +1,4 @@
-import { BaseError } from '../errorBaseClass';
+import { BaseError } from '../BaseError';
 
 /**
  * testFunctionListFactory 関数のエラー

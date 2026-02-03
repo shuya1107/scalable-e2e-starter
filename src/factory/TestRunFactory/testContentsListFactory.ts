@@ -1,5 +1,5 @@
 import testContent from '../../../testdata/testContent.json';
-import { TestContentsListFactoryError } from '../../error/errorIndex';
+import { TestContentsListFactoryError } from '../../error/systemErrorIndex';
 
 
 export function testContentsListFactory(): string[][] {

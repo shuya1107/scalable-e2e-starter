@@ -11,8 +11,6 @@ export type TestStatus = 'SUCCESS' | 'FAIL' | 'EXPECTED';
  */
 export interface TestResultData {
     timestamp: string;      // 実行日時
-    scenarioId: string;     // シナリオID
-    memberCode: string;     // 会員コード
     memberAttributes: any;  // 会員情報(JSON)
     status: TestStatus;     // 結果
     message: string;        // 詳細メッセージ

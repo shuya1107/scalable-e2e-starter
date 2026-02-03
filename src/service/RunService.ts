@@ -18,11 +18,13 @@ import { RunScenarioGroupDto } from '../dto/dtoIndex';
 // ファクトリー関数
 import { testFunctionListFactory, createStrategies, testContentsListFactory } from '../factory/factoryIndex';
 
+import { SystemErrorHandler } from '../error/errorHandler/SystemErrorHandler';
 
 export class RunService {
 
-    private mainLogger: TestLogger;
-    private debugLogger: TestLogger;
+    private readonly mainLogger: TestLogger;
+    private readonly debugLogger: TestLogger;
+    private readonly errorHandler: SystemErrorHandler;
 
     get mainLoggerInstance() {
         return this.mainLogger;
@@ -30,6 +32,10 @@ export class RunService {
 
     get debugLoggerInstance() {
         return this.debugLogger;
+    }
+    
+    get errorHandlerInstance() {
+        return this.errorHandler;
     }
 
     constructor() {
@@ -41,13 +47,16 @@ export class RunService {
         const workerTag = (workerIndex ?? '0').toString(); // Playwrightが未設定のときは0扱いにする
         const mainLogger = new TestLogger("./logs", `System.worker-${workerTag}.log`, logLevel);
         const mainDebugLogger = new TestLogger("./logs", `System.worker-${workerTag}.debug.log`, 'debug');
+        const errorHandler = new SystemErrorHandler(mainLogger, mainDebugLogger);
     
+
+
         // デバッグ用のログファイルがない場合はメインのログファイルに書くようにしている
         //ただしメインログファイルはINFO以上しか書き込まないためDEBUGログは出力されない
         const debugLogger = mainDebugLogger ?? mainLogger;
         this.mainLogger = mainLogger;
         this.debugLogger = debugLogger;
-
+        this.errorHandler = errorHandler;
     }
 
     createExecutionData() {

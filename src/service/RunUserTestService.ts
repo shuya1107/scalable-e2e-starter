@@ -8,11 +8,13 @@ import type { LogLevel, TestExecutionContext, TestStrategy } from '../typeList/i
 // DTOの型定義
 import { RunUserTestDto } from '../dto/dtoIndex';
 
-// テストのレポートクラス
-import { TestReport } from '../report/TestReport';
+import { ExpectedErrorBaseClass } from '../error/ExpectedErrorBaseClass';
+
+
 
 import * as path from 'path';
 import * as fs from 'fs';
+import { testReportFactory } from '../factory/reportFactory/testReportFactory';
 
 
 export class RunUserTestService {
@@ -37,24 +39,17 @@ export class RunUserTestService {
     }
 
     async runUserTestStart() {
-        // ★追加: ここで明示的にトレース(録画)を開始します
-        // これがないと "Must start tracing before stopping" と怒られます
-        await this.page.context().tracing.start({ 
-            screenshots: true, 
-            snapshots: true, 
-            sources: true      // ソースコードも記録する
-        });
+
+        // ここで明示的にトレース(録画)を開始します
+        // レポートに表示するためのトレースを保存する準備
+        await this.startTracing();
         
         //  レポート用紙（TestReport）を作成して計測開始
         // ※シナリオIDは一旦 'Scenario-Main' としているが、シナリオの名前を付けるなら必要に応じて変更すること
-        const report = new TestReport(
-            'Scenario-Main', 
-            this.runUserTestDto.data.memberCode,
-            this.runUserTestDto.data
-        );
+        const report = testReportFactory(this.runUserTestDto.data);
 
         // テスト開始のログ出力
-        this.testStartLog();
+        this.testStartLog(); 
 
         try {
 
@@ -73,22 +68,24 @@ export class RunUserTestService {
             this.logger.logError(error, { memberCode: this.runUserTestDto.data.memberCode });
             this.logger.printFailureLogs(this.runUserTestDto.data.memberCode);
 
-            // ここで「正体不明のerror」を「使えるErrorオブジェクト(err)」に変換する
-            const err = error instanceof Error ? error : new Error(String(error));
 
             // エラー内容に応じてレポートに記録
             // エラーメッセージに「EXPECTED」が含まれていれば想定内とする
             // 後でここを変更して何がEXPECTEDエラーかを判定する仕組みを作りなおす
-            if (err.message.includes('EXPECTED') || err.message.includes('想定内')) {
-                report.setResult('EXPECTED', err.message);
+            if (error instanceof ExpectedErrorBaseClass) {
+                // ① 自分で作った「想定内エラークラス」だった場合
+                // → ステータスを EXPECTED にする
+                report.setResult('EXPECTED', error.message);
+
             } else {
-                // それ以外はシステムエラー（FAIL）
-                report.setResult('FAIL', err.message);
+                // ② それ以外（Playwrightのタイムアウト、バグ、予期せぬエラーなど）
+                // → ステータスを FAIL (システムエラー) にする
                 
-                // ※将来ここにトレース保存処理を追加できます
-                // const tracePath = await this.saveTrace(...);
-                // report.setTracePath(tracePath);
+                // unknown型をError型に変換してメッセージを取り出す
+                const err = error instanceof Error ? error : new Error(String(error));
+                report.setResult('FAIL', err.message);
             }
+
         }finally {
 
             // ★ここを書き換えます --------------------------------------
@@ -162,5 +159,15 @@ export class RunUserTestService {
             testInfo: this.testInfo,
             strategyIndex
         };
+    }
+
+    private async startTracing() {
+        // ★追加: ここで明示的にトレース(録画)を開始します
+        // これがないと "Must start tracing before stopping" と怒られます
+        await this.page.context().tracing.start({ 
+            screenshots: true, 
+            snapshots: true, 
+            sources: true      // ソースコードも記録する
+        });
     }
 }

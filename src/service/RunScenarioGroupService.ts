@@ -13,19 +13,26 @@ import { formatLogContext } from '../utils/TestLogger';
 import { runUserTestDtoFactory } from '../dto/dtoFactoryIndex';
 
 // エラークラス
-import { RunScenarioGroupServiceError } from '../error/errorIndex';
+import { RunScenarioGroupServiceError } from '../error/systemErrorIndex';
 
 import type { User } from '../typeList/index';
+
+import { SystemErrorHandler } from '../error/errorHandler/SystemErrorHandler';
 
 
 export class RunScenarioGroupService {
 
     private readonly dto: RunScenarioGroupDto;
     private readonly userDataList: User[][];
+    private readonly errorHandler: SystemErrorHandler;
+    
+    
 
     constructor(dto: RunScenarioGroupDto) {
         this.dto = dto;
         this.userDataList = userDataList;
+        const errorHandler = new SystemErrorHandler(this.dto.mainLogger, this.dto.debugLogger);
+        this.errorHandler = errorHandler;
     }
 
     get scenarioIndex(): number {
@@ -38,6 +45,10 @@ export class RunScenarioGroupService {
 
     get debugLogger() {
         return this.dto.debugLogger;
+    }
+
+    get errorHandlerInstance() {
+        return this.errorHandler;
     }
 
     createScenarioGroup() {

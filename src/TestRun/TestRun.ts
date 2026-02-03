@@ -1,9 +1,5 @@
 import { test } from '@playwright/test';
 
-// エラーハンドリング用の関数
-//後でクラス化したほうがいいと思われる
-import { errorHandleFactory } from '../error/errorHandler/errorHandler';
-
 // サービスのファクトリ関数
 import { runScenarioGroupServiceFactory, runServiceFactory, runUserTestServiceFactory } from '../service/factory/serviceFactoryIndex';
 
@@ -70,8 +66,8 @@ export function run() {
         }
     } catch (error) {
 
-        // エラーハンドリング用の関数
-        errorHandleFactory(error, runService.mainLoggerInstance, runService.debugLoggerInstance);
+        runService.errorHandlerInstance.handle(error);
+
     }
     
 }
@@ -127,7 +123,7 @@ export function runScenarioGroup(runScenarioGroupService: ReturnType<typeof runS
         });
     } catch (error) {
         // 基本的に予期しないエラーのみ飛んでくる意味がないわけではないと思いたい使われないのが一番良い
-        errorHandleFactory(error, runScenarioGroupService.mainLogger, runScenarioGroupService.debugLogger);
+        runScenarioGroupService.errorHandlerInstance.handle(error);
     }
 }
 
