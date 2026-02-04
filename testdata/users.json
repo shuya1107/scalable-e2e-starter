@@ -3,7 +3,7 @@
     {
       "memberCode": "M009",
       "key": "LOGIN_STANDARD",
-      "status": "active"
+      "status": "sample"
     },
     {
       "memberCode": "M022",
@@ -13,7 +13,7 @@
     {
       "memberCode": "M939",
       "key": "ADMIN_ACCESS",
-      "status": "admin"
+      "status": "sample"
     }
   ],
   [
@@ -25,7 +25,7 @@
     {
       "memberCode": "M064",
       "key": "LOGIN_ERROR",
-      "status": "locked"
+      "status": "sample"
     },
     {
       "memberCode": "M990",

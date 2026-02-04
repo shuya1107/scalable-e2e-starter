@@ -9,7 +9,7 @@ import type { LogLevel, TestExecutionContext, TestStrategy } from '../typeList/i
 import { RunUserTestDto } from '../dto/dtoIndex';
 
 import { ExpectedErrorBaseClass } from '../error/ExpectedErrorBaseClass';
-
+import { ExpectedErrorHandler } from '../error/errorHandler/ExpectedErrorHandler';
 
 
 import * as path from 'path';
@@ -45,7 +45,6 @@ export class RunUserTestService {
         await this.startTracing();
         
         //  レポート用紙（TestReport）を作成して計測開始
-        // ※シナリオIDは一旦 'Scenario-Main' としているが、シナリオの名前を付けるなら必要に応じて変更すること
         const report = testReportFactory(this.runUserTestDto.data);
 
         // テスト開始のログ出力
@@ -68,23 +67,10 @@ export class RunUserTestService {
             this.logger.logError(error, { memberCode: this.runUserTestDto.data.memberCode });
             this.logger.printFailureLogs(this.runUserTestDto.data.memberCode);
 
+            const expectedErrorHandler = new ExpectedErrorHandler(this.logger, this.logger);
+            await expectedErrorHandler.handle(error, report, this.runUserTestDto.data.status);
 
-            // エラー内容に応じてレポートに記録
-            // エラーメッセージに「EXPECTED」が含まれていれば想定内とする
-            // 後でここを変更して何がEXPECTEDエラーかを判定する仕組みを作りなおす
-            if (error instanceof ExpectedErrorBaseClass) {
-                // ① 自分で作った「想定内エラークラス」だった場合
-                // → ステータスを EXPECTED にする
-                report.setResult('EXPECTED', error.message);
-
-            } else {
-                // ② それ以外（Playwrightのタイムアウト、バグ、予期せぬエラーなど）
-                // → ステータスを FAIL (システムエラー) にする
-                
-                // unknown型をError型に変換してメッセージを取り出す
-                const err = error instanceof Error ? error : new Error(String(error));
-                report.setResult('FAIL', err.message);
-            }
+            
 
         }finally {
 

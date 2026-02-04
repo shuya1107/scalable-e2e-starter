@@ -1,4 +1,5 @@
 import type { TestAFunction } from '../../../typeList';
+import { SampleError } from '../../../error/expectedErrors/SampleError';
 
 const functionName = "search";
 
@@ -9,9 +10,9 @@ export const search = (async (page, data, logger) => {
 
     logger.log(`${functionName}成功`);
 
-    // if (!false){
-    //     throw new Error("searchでエラー発生");
-    // }
+    if (!false){
+        throw new SampleError("searchでエラー発生");
+    }
 
     // ★処理全体を test.step で囲む
         
