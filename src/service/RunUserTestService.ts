@@ -8,7 +8,6 @@ import type { LogLevel, TestExecutionContext, TestStrategy } from '../typeList/i
 // DTOの型定義
 import { RunUserTestDto } from '../dto/dtoIndex';
 
-import { ExpectedErrorBaseClass } from '../error/ExpectedErrorBaseClass';
 import { ExpectedErrorHandler } from '../error/errorHandler/ExpectedErrorHandler';
 
 
