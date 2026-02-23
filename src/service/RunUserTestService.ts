@@ -20,8 +20,11 @@ export class RunUserTestService {
 
     private runUserTestDto: RunUserTestDto;
     private logger: TestLogger;
+    private debugLogger: TestLogger;
     private testInfo: TestInfo;
     private page: Page;
+    private testName: string;
+    private description: string;
 
 
     constructor(runUserTestDto: RunUserTestDto, testInfo: TestInfo, page: Page) {
@@ -29,11 +32,15 @@ export class RunUserTestService {
         //ログについてのクラス
         const logLevel = (process.env.LOG_LEVEL as LogLevel) || 'info';
         const logger = new TestLogger(testInfo.outputDir, `log.txt`, logLevel);
+        const debugLogger = new TestLogger(testInfo.outputDir, `debug.log`, 'debug');
 
         this.runUserTestDto =  runUserTestDto;
         this.logger = logger;
+        this.debugLogger = debugLogger;
         this.testInfo = testInfo;
         this.page = page;
+        this.testName = runUserTestDto.testName;
+        this.description = runUserTestDto.description;
 
     }
 
@@ -44,7 +51,11 @@ export class RunUserTestService {
         await this.startTracing();
         
         //  レポート用紙（TestReport）を作成して計測開始
-        const report = testReportFactory(this.runUserTestDto.data);
+        const report = testReportFactory(
+            this.runUserTestDto.data,
+            this.testName,
+            this.description
+        );
 
         // テスト開始のログ出力
         this.testStartLog(); 
@@ -66,7 +77,7 @@ export class RunUserTestService {
             this.logger.logError(error, { memberCode: this.runUserTestDto.data.memberCode });
             this.logger.printFailureLogs(this.runUserTestDto.data.memberCode);
 
-            const expectedErrorHandler = new ExpectedErrorHandler(this.logger, this.logger);
+            const expectedErrorHandler = new ExpectedErrorHandler(this.logger, this.debugLogger);
             await expectedErrorHandler.handle(error, report, this.runUserTestDto.data.status);
 
             
@@ -83,8 +94,10 @@ export class RunUserTestService {
                 fs.mkdirSync(traceDir, { recursive: true });
             }
 
-            // 3. ファイル名を決める
-            const fileName = `trace-${this.runUserTestDto.data.memberCode}.zip`;
+            // 3. ファイル名を決める（上書き防止のため一意化）
+            const safeTestName = this.testName.replace(/[^a-zA-Z0-9_-]/g, '_');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const fileName = `trace-${safeTestName}-${this.runUserTestDto.data.memberCode}-${timestamp}.zip`;
             // 最終的なパス: test-results/traces/trace-M009.zip
             const tracePath = path.join(traceDir, fileName);
 

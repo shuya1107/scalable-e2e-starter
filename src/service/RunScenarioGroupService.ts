@@ -31,7 +31,8 @@ export class RunScenarioGroupService {
     constructor(dto: RunScenarioGroupDto) {
         this.dto = dto;
         this.userDataList = userDataList;
-        const errorHandler = new SystemErrorHandler(this.dto.mainLogger, this.dto.debugLogger);
+        const content = this.dto.contents;
+        const errorHandler = new SystemErrorHandler(content.mainLogger, content.debugLogger);
         this.errorHandler = errorHandler;
     }
 
@@ -40,11 +41,11 @@ export class RunScenarioGroupService {
     }
 
     get mainLogger() {
-        return this.dto.mainLogger;
+        return this.dto.contents.mainLogger;
     }
 
     get debugLogger() {
-        return this.dto.debugLogger;
+        return this.dto.contents.debugLogger;
     }
 
     get errorHandlerInstance() {
@@ -68,8 +69,10 @@ export class RunScenarioGroupService {
 
             const runUserTestDto: RunUserTestDto = runUserTestDtoFactory({
                 data,   //会員の情報
-                testList: this.dto.testList,   //シナリオの配列
-                myFunctionList: this.dto.myFunctionList   //関数のリスト
+                testName: this.dto.testName,
+                description: this.dto.description,
+                testList: this.dto.contents.testList,   //シナリオの配列
+                myFunctionList: this.dto.contents.myFunctionList   //関数のリスト
             });
 
             runUserDto.push(runUserTestDto);
@@ -89,9 +92,10 @@ export class RunScenarioGroupService {
         // もしシナリオの数より会員の数が少なかった（配列の数）場合スキップして終わらせる。
         if (!targetUsers) {
             const ctx = formatLogContext({ scenarioIndex: this.dto.scenarioIndex });
-            if(this.dto.mainLogger){
-                this.dto.mainLogger.error(`${ctx}異常終了(定義不足): シナリオ番号 ${this.dto.scenarioIndex + 1} に対応する会員データがありません。`);
-                this.dto.mainLogger.error(`${ctx}user.json の配列数と testContents.json の配列数を確認してください。`);
+            const content = this.dto.contents;
+            if(content.mainLogger){
+                content.mainLogger.error(`${ctx}異常終了(定義不足): シナリオ番号 ${this.dto.scenarioIndex + 1} に対応する会員データがありません。`);
+                content.mainLogger.error(`${ctx}user.json の配列数と testContents.json の配列数を確認してください。`);
             }
             throw new RunScenarioGroupServiceError(`${ctx}シナリオ番号 ${this.dto.scenarioIndex + 1} に対応する会員データがありません。users.json の配列数と testContents.json の配列数を確認してください。`);
         }
@@ -108,9 +112,10 @@ export class RunScenarioGroupService {
         // 実行フェーズだけで開始ログを出す
         test.beforeAll(() => {
             const ctx = formatLogContext({ scenarioIndex: this.dto.scenarioIndex });
-            this.dto.debugLogger?.debug(`${ctx}runScenarioGroup 開始`);
-            this.dto.mainLogger?.info(`${ctx}start: members planned=${plannedMembers}`);
-            this.dto.debugLogger?.debug(`${ctx}members detail: ${JSON.stringify(targetUsers)}`);
+            const content = this.dto.contents;
+            content.debugLogger?.debug(`${ctx}runScenarioGroup 開始`);
+            content.mainLogger?.info(`${ctx}start: members planned=${plannedMembers}`);
+            content.debugLogger?.debug(`${ctx}members detail: ${JSON.stringify(targetUsers)}`);
         });
 
     }
@@ -119,8 +124,9 @@ export class RunScenarioGroupService {
         // シナリオの全テスト完了のログ
         test.afterAll(() => {
             const ctx = formatLogContext({ scenarioIndex: this.dto.scenarioIndex });
-            this.dto.mainLogger.info(`${ctx}Scenario Group ${this.dto.scenarioIndex + 1} 完了`);
-            this.dto.debugLogger.debug(`${ctx}runScenarioGroup 完了`);
+            const content = this.dto.contents;
+            content.mainLogger.info(`${ctx}Scenario Group ${this.dto.scenarioIndex + 1} 完了`);
+            content.debugLogger.debug(`${ctx}runScenarioGroup 完了`);
         });
     }
 }

@@ -1,94 +1,108 @@
 import * as fs from 'fs';
 import * as path from 'path';
-
-// ★変更点：ここが index.ts (../types) からの一括インポートになりました
-import { TestStatus, TestResultData, User } from '../typeList/index';
+import { TestGroupLog, TestLogDetail, TestStatus, User } from '../typeList/index';
 
 export class TestReport {
-    // 保存先のパス（プロジェクト直下の execution_report.csv）
-    private static filePath = path.join(process.cwd(), 'execution_report.csv');
+    // 保存先をJSONに変更
+    private static filePath = path.join(process.cwd(), 'execution_report.json');
     
     private startTime: number;
-    private data: TestResultData;
+    
+    // このテスト個別のデータ
+    private memberData: User;
+    private testName: string;
+    private description: string;
+    
+    // 結果データ
+    private status: TestStatus = 'FAIL';
+    private message: string = '';
+    private tracePath: string = '';
 
     /**
-     * コンストラクタ：テスト開始時に呼ばれる
-     * 誰の、どのシナリオかを確定させる
+     * コンストラクタ
+     * ★ 親情報（testName, description）も受け取るように変更！
      */
-    constructor(memberAttributes: User) {
+    constructor(memberAttributes: User, testName: string, description: string) {
         this.startTime = Date.now();
-        
-        // 初期状態をセット
-        this.data = {
-            timestamp: new Date().toLocaleTimeString('ja-JP'),
-            memberAttributes,
-            status: 'FAIL', // デフォルトはFAILにしておく（途中で落ちた場合のため）
-            message: '',
-            durationSeconds: 0
-        };
+        this.memberData = memberAttributes;
+        this.testName = testName;
+        this.description = description;
     }
 
     /**
-     * 静的メソッド：実行の最初に1回だけ呼んで、ファイルを初期化する
+     * 初期化：空の配列 [] を作成する
      */
     static initialize() {
         try {
-            // もし古いファイルが残っていたら削除してリセットする
             if (fs.existsSync(this.filePath)) {
                 fs.unlinkSync(this.filePath);
             }
-
-            // 見出し行を書き込む（BOM付き）
-            const header = '実行日時,会員コード,属性,ステータス,メッセージ,処理時間(秒),トレースパス\n';
-            fs.writeFileSync(this.filePath, '\uFEFF' + header);
-            
-            console.log('📝 レポートファイルを初期化しました');
+            // 空のJSON配列で初期化
+            fs.writeFileSync(this.filePath, JSON.stringify([], null, 2));
+            console.log('📝 レポート(JSON)を初期化しました');
         } catch (e) {
             console.error('レポート初期化エラー:', e);
         }
     }
 
-    /**
-     * 結果を確定させる
-     */
     setResult(status: TestStatus, message: string = '') {
-        this.data.status = status;
-        this.data.message = message;
+        this.status = status;
+        this.message = message;
     }
 
-    /**
-     * トレースファイルのパスを紐付ける
-     */
     setTracePath(path: string) {
-        this.data.tracePath = path;
+        this.tracePath = path;
     }
 
     /**
-     * ファイルに保存（追記）する
+     * JSONファイルに結果を構造化して保存する
+     * (Read -> Modify -> Write)
      */
     save() {
-        // 処理時間を計算
-        this.data.durationSeconds = (Date.now() - this.startTime) / 1000;
+        const duration = (Date.now() - this.startTime) / 1000;
+        const timestamp = new Date().toLocaleString('ja-JP');
 
-        const line = this.formatToCsv();
-        
+        // 1. 今回のログ明細データを作成
+        const newLog: TestLogDetail = {
+            executedAt: timestamp,
+            memberCode: this.memberData.memberCode,
+            status: this.status,
+            message: this.message,
+            durationSeconds: duration,
+            tracePath: this.tracePath || '',
+            userAttributes: this.memberData
+        };
+
         try {
-            fs.appendFileSync(TestReport.filePath, line);
+            // 2. 既存のJSONファイルを読み込む
+            let reportData: TestGroupLog[] = [];
+            if (fs.existsSync(TestReport.filePath)) {
+                const fileContent = fs.readFileSync(TestReport.filePath, 'utf-8');
+                // ファイルが空の場合は空配列扱い
+                reportData = fileContent ? JSON.parse(fileContent) : [];
+            }
+
+            // 3. 該当する「テストグループ」を探す
+            let targetGroup = reportData.find(group => group.testName === this.testName);
+
+            if (targetGroup) {
+                // A. 既にグループがあれば、そのlogsに追加
+                targetGroup.logs.push(newLog);
+            } else {
+                // B. なければ、新しいグループを作って追加
+                const newGroup: TestGroupLog = {
+                    testName: this.testName,
+                    description: this.description,
+                    logs: [newLog]
+                };
+                reportData.push(newGroup);
+            }
+
+            // 4. ファイルに書き戻す (整形して書き込み)
+            fs.writeFileSync(TestReport.filePath, JSON.stringify(reportData, null, 2));
+
         } catch (e) {
-            console.error(`レポート書き込み失敗 (${this.data.memberAttributes.memberCode}):`, e);
+            console.error(`レポート保存失敗 (${this.memberData.memberCode}):`, e);
         }
-    }
-
-    // 内部用：CSV用に整形する（カンマや改行のエスケープ処理）
-    private formatToCsv(): string {
-        const { timestamp, memberAttributes, status, message, durationSeconds, tracePath } = this.data;
-        const memberCode = memberAttributes?.memberCode ?? '';
-
-        // JSONやメッセージ内の特殊文字を処理 (CSV崩れ防止)
-        const safeAttr = JSON.stringify(memberAttributes).replace(/"/g, '""');
-        const safeMsg = message.replace(/\r?\n/g, ' ').replace(/"/g, '""');
-
-        // CSVフォーマットで結合
-        return `${timestamp},${memberCode},"${safeAttr}",${status},"${safeMsg}",${durationSeconds},${tracePath || ''}\n`;
     }
 }

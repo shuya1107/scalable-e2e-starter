@@ -27,3 +27,7 @@ export {
 export {
     RunError
 } from './errors/RunError';
+
+export {
+    TestDetailsListFactoryError
+} from './errors/testDetailsListFactoryError';

@@ -12,3 +12,7 @@ export {
     createStrategies
 } from './TestRunFactory/testFactory';  
 
+export {
+    testDetailsListFactory
+} from './TestRunFactory/testDetailsListFactory';
+

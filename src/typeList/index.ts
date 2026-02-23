@@ -12,7 +12,8 @@ export type {
     ActionFn, 
     ActionFnMap, 
     FunctionNameList, 
-    ScenarioFunctionList 
+    ScenarioFunctionList,
+    ScenarioFunctionItem
 } from './types/functionTypes';
 
 // テストシナリオ関連
@@ -32,6 +33,7 @@ export type {
 // テスト結果レポート関連
 export type {
     TestStatus,
-    TestResultData
+    TestGroupLog,
+    TestLogDetail
 } from './types/testReport';
 

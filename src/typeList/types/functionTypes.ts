@@ -5,7 +5,10 @@ import { Page } from '@playwright/test';
 // 1つの細かい処理（関数）の型
 export type ActionFn = (page: Page, data: import('./userType').User, logger: import('../../utils/TestLogger').TestLogger) => Promise<void>;
 
-// 関数名をキーとして ActionFn を値に持つレコード型
+/**
+ * 関数名をキー、ActionFnを値とするレコード型
+ * Tは使用時にタグの型を指定する
+ */
 export type ActionFnMap<T> = Record<string, T>;
 
 // テストで使う関数名の配列（例: ["open", "search"]）
@@ -13,3 +16,8 @@ export type FunctionNameList = string[];
 
 // 1つのシナリオグループで使う関数リスト（例: [["open", "search"], ["open"]])
 export type ScenarioFunctionList = FunctionNameList[];
+
+// testContent.json の scenario 要素（例: { "func": "open" }）
+export interface ScenarioFunctionItem {
+	func: string;
+}

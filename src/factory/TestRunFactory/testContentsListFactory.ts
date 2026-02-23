@@ -7,7 +7,8 @@ export function testContentsListFactory(): string[][] {
     try {
         const testScenarios = testContent;
 
-        // データ検証: testContentが配列かチェック
+        // ■■■ 1. 最上位の検証 ■■■
+        // データ検証: testContent自体が配列であることを保証
         if (!Array.isArray(testScenarios)) {
             throw new TestContentsListFactoryError(
                 'testContent.json のデータ構造が不正です。配列である必要があります。',
@@ -15,25 +16,31 @@ export function testContentsListFactory(): string[][] {
             );
         }
 
-        const scenarioList: string[][] = [];  // テストの手順を入れる用
+        // 最終的な戻り値を入れる箱
+        // 構造: [ ["TestA", "TestA"], ["TestB"] ] (テストクラス名の配列の配列)
+        const scenarioList: string[][] = [];
 
-        for (const group of testScenarios) {
+        // ■■■ 2. グループごとのループ処理 ■■■
+        for (const groupObj of testScenarios) {
+            // groupObj: { groupName: string, steps: Array } 形式のオブジェクト
 
-            // データ検証: groupが配列かチェック
-            if (!Array.isArray(group)) {
+            // ■■■ 変更箇所: steps 配列の検証と取得 ■■■
+            // groupObj の中に "steps" プロパティがあり、それが配列であることを確認
+            if (!groupObj.steps || !Array.isArray(groupObj.steps)) {
                 throw new TestContentsListFactoryError(
-                    'testContent.json の各グループは配列である必要があります。',
+                    'testContent.json の各グループには "steps" 配列が必要です。',
                     'validation'
                 );
             }
 
-            const tests: string[] = [];
+            const tests: string[] = [];      // 1グループ分のテストクラス名を貯める箱
+            const steps = groupObj.steps;    // steps配列を取り出す
             
-            for (const step of group) {
-                //ここでstepはこれ
-                //{ "test": "TestA", "scenario": {...} }
-                
-                // データ検証: stepにtestプロパティがあるかチェック
+            // ■■■ 3. ステップごとのループ処理 ■■■
+            for (const step of steps) {
+                // step: { "test": "TestA", "scenario": [...] }
+
+                // データ検証: stepに "test" プロパティ（クラス名）があるかチェック
                 if (!step.test || typeof step.test !== 'string') {
                     throw new TestContentsListFactoryError(
                         'testContent.json の各stepには "test" プロパティ（文字列）が必要です。',
@@ -43,17 +50,10 @@ export function testContentsListFactory(): string[][] {
 
                 const scenario = step.test;
                 tests.push(scenario);
-
             }
 
-            //[
-            //    1つ目のテスト（グループ）の配列（１ループ目でできる）
-            //   [ "TestA", "TestA" ], 
-            
-            //    2つ目のテスト（グループ）の配列（２ループ目でできる）
-            //   [ "TestA" ]
-            // ]
-            //こんな感じの配列　テストケース一つで配列が1つ中にできる想定
+            // 完成したグループごとのクラス名リストを追加
+            // 例: [ "TestA", "TestA" ]
             scenarioList.push(tests);
         }
 
@@ -65,7 +65,7 @@ export function testContentsListFactory(): string[][] {
             throw error;
         }
 
-        // SyntaxErrorの場合はJSONパースエラー（importなので通常起こらない）
+        // SyntaxErrorの場合はJSONパースエラー
         if (error instanceof SyntaxError) {
             throw new TestContentsListFactoryError(
                 'testContent.json のパースに失敗しました。JSON形式を確認してください。',
@@ -80,8 +80,6 @@ export function testContentsListFactory(): string[][] {
             'unknown',
             error
         );
-
     }
     
 }
-    

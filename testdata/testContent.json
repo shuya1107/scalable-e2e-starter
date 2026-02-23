@@ -1,26 +1,34 @@
 [
-  [
-    {
-      "test": "TestA",
-      "scenario": {
-        "scenario1": "open",
-        "scenario2": "search"
+  {
+    "testName": "testSampleA(このテストシナリオの名前)",  
+    "description":"このテストの説明",
+    "steps": [                  
+      {
+        "test": "TestA",
+        "scenario": [
+          {"func": "open"},
+          {"func": "search"}
+        ]
+      },
+      {
+        "test": "TestA",
+        "scenario": [
+          {"func": "open"}
+        ]
       }
-    },
-    {
-      "test": "TestA",
-      "scenario": {
-        "scenario1": "open"
+    ]
+  },
+  {
+    "testName": "testSampleB(このテストシナリオの名前)",  
+    "description":"このテストの説明",
+    "steps": [                  
+      {
+        "test": "TestA",
+        "scenario": [
+          {"func": "open"},
+          {"func": "search"}
+        ]
       }
-    }
-  ],
-  [
-    {
-      "test": "TestA",
-      "scenario": {
-        "scenario1": "open",
-        "scenario2": "search"
-      }
-    }
-  ]
+    ]
+  }
 ]

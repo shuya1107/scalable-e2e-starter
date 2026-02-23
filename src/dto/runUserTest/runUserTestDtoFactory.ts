@@ -6,11 +6,15 @@ import { RunUserTestDto } from './runUserTestDto';
  */
 export function runUserTestDtoFactory(params: {
     data: User;
+    testName: string;
+    description: string;
     testList: ScenarioStep;
     myFunctionList: ScenarioFunctionList;
 }): RunUserTestDto {
     return new RunUserTestDto(
         params.data,
+        params.testName,
+        params.description,
         params.testList,
         params.myFunctionList
     );

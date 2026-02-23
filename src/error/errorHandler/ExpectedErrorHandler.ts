@@ -19,23 +19,23 @@ export class ExpectedErrorHandler {
         currentUserStatus: string
     ): Promise<void> {
 
-        // エラーオブジェクトを any にキャストして、プロパティがあるか覗き見る
-        const e = error as any;
-        const allowedStatus = e.allowedStatus; // エラー側が指定する「許可されたステータス」
-
-        // -----------------------------------------------------------
-        // 1. エラー側が「許可ステータス」を持っている場合
-        // -----------------------------------------------------------
-        if (allowedStatus) {
+        // ★ 1. いきなり「自作の想定内エラー」かどうかを判定する（型ガード）
+        if (error instanceof ExpectedErrorBaseClass) {
             
-            // ★ステータスの答え合わせ
+            // この中に入れば、error は ExpectedErrorBaseClass 型として保証されるため
+            // any キャスト不要で allowedStatus や name に安全にアクセスできます！
+            const allowedStatus = error.allowedStatus; 
+
+            // -----------------------------------------------------------
+            // 2. ステータスの答え合わせ
+            // -----------------------------------------------------------
             if (allowedStatus === currentUserStatus) {
                 // 【一致】 正解！ (例: lockedユーザーでロックエラー)
-                const msg = `[ステータス一致] ユーザー状態: ${currentUserStatus}, エラー: ${e.name}`;
+                const msg = `[ステータス一致] ユーザー状態: ${currentUserStatus}, エラー: ${error.name}`;
                 this.mainLogger.info(`[EXPECTED] ${msg}`);
                 
                 // レポートには「成功（期待通り）」として記録
-                report.setResult('EXPECTED', `${msg} - ${e.message}`);
+                report.setResult('EXPECTED', `${msg} - ${error.message}`);
                 return; // 終了
 
             } else {
@@ -43,40 +43,23 @@ export class ExpectedErrorHandler {
                 const msg = `ステータス不一致: ユーザーは "${currentUserStatus}" ですが、"${allowedStatus}" 時専用のエラーが発生しました`;
                 
                 this.mainLogger.error(`[FAIL] ${msg}`);
-                this.debugLogger.error(`Stack: ${e.stack}`);
+                if (error.stack) {
+                    this.debugLogger.error(`Stack: ${error.stack}`);
+                }
                 
-                report.setResult('FAIL', `${msg} - ${e.message}`);
+                report.setResult('FAIL', `${msg} - ${error.message}`);
                 return; // 終了
             }
         }
 
         // -----------------------------------------------------------
-        // 2. 想定内エラークラスだが、許可ステータスを持っていない場合
-        // -----------------------------------------------------------
-        // ※上のif文で return しているので、ここに来る時点で allowedStatus は undefined です
-        
-        if (error instanceof ExpectedErrorBaseClass) {
-            // ケースA: データ定義不足
-            // 「想定内エラー」として投げられたが、どのステータスで許されるか定義されていない
-            // または、現在のステータスでは許可されていない汎用エラーとみなされる
-            
-            const failMessage = `データ定義不足: "${e.name}" が発生しましたが、このステータス (${currentUserStatus}) では想定されていません (allowedStatusが未定義)`;
-
-            this.mainLogger.error(`[FAIL] テスト準備不足またはバグ: ${failMessage}`);
-            this.debugLogger.error(`Stack: ${e.stack}`);
-
-            // ★修正: ここでレポートに書かないと、結果がFAILになりません！
-            report.setResult('FAIL', failMessage); 
-            return;
-        }
-        
-        // -----------------------------------------------------------
-        // 3. そもそも想定外のシステムエラー (ケースB)
+        // 3. そもそも想定外のシステムエラー (自作クラスではない場合)
         // -----------------------------------------------------------
         const unexpectedMsg = error instanceof Error ? error.message : String(error);
         
         this.mainLogger.error(`[FAIL] 想定内エラーを期待しましたが、予期しないエラーが発生しました`);
         this.mainLogger.error(`詳細: ${unexpectedMsg}`);
+        
         if (error instanceof Error && error.stack) {
              this.debugLogger.error(`Stack: ${error.stack}`);
         }

@@ -1,3 +1,5 @@
+
+
 /**
  * テスト結果のステータス定義
  * SUCCESS: 成功
@@ -6,14 +8,25 @@
  */
 export type TestStatus = 'SUCCESS' | 'FAIL' | 'EXPECTED';
 
+
 /**
- * レポートデータの構造定義
+ * テストグループ単位のレポート構造
  */
-export interface TestResultData {
-    timestamp: string;      // 実行日時
-    memberAttributes: any;  // 会員情報(JSON)
-    status: TestStatus;     // 結果
-    message: string;        // 詳細メッセージ
-    tracePath?: string;     // トレースファイルのパス
-    durationSeconds: number;// 処理時間(秒)
+export interface TestGroupLog {
+    testName: string;
+    description: string;
+    logs: TestLogDetail[];
+}
+
+/**
+ * 実行ログ1件分の構造
+ */
+export interface TestLogDetail {
+    executedAt: string;
+    memberCode: string;
+    status: TestStatus;
+    message: string;
+    durationSeconds: number;
+    tracePath: string;
+    userAttributes: import('./userType').User;
 }

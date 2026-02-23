@@ -14,20 +14,24 @@ import { RunUserTestDto } from '../dto/dtoIndex';
  * [
  *   // シナリオグループ1
  *   RunScenarioGroupDto {
- *     testList: [TestAインスタンス, TestAインスタンス],  // 2つのテスト手順
  *     scenarioIndex: 0,
- *     myFunctionList: [["open", "search"], ["open"]],  // 各テストで使う関数リスト
- *     mainLogger: TestLogger,
- *     debugLogger: TestLogger
+ *     contents: {
+ *       testList: [TestAインスタンス, TestAインスタンス],  // 2つのテスト手順
+ *       myFunctionList: [["open", "search"], ["open"]],  // 各テストで使う関数リスト
+ *       mainLogger: TestLogger,
+ *       debugLogger: TestLogger
+ *     }
  *   },
  * 
  *   // シナリオグループ2
  *   RunScenarioGroupDto {
- *     testList: [TestAインスタンス],  // 1つのテスト手順
  *     scenarioIndex: 1,
- *     myFunctionList: [["open", "search"]],
- *     mainLogger: TestLogger,
- *     debugLogger: TestLogger
+ *     contents: {
+ *       testList: [TestAインスタンス],  // 1つのテスト手順
+ *       myFunctionList: [["open", "search"]],
+ *       mainLogger: TestLogger,
+ *       debugLogger: TestLogger
+ *     }
  *   }
  * ]
  * 
@@ -35,11 +39,13 @@ import { RunUserTestDto } from '../dto/dtoIndex';
  * 
  * @runScenarioGroupDto - 1つのシナリオグループのDTO
  * RunScenarioGroupDto {
- *   testList: [TestAインスタンス, TestAインスタンス],
  *   scenarioIndex: 0,
- *   myFunctionList: [["open", "search"], ["open"]],
- *   mainLogger: TestLogger,
- *   debugLogger: TestLogger
+ *   contents: {
+ *     testList: [TestAインスタンス, TestAインスタンス],
+ *     myFunctionList: [["open", "search"], ["open"]],
+ *     mainLogger: TestLogger,
+ *     debugLogger: TestLogger
+ *   }
  * }
  * 
  * これを次の関数runScenarioGroupに渡す

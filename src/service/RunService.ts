@@ -16,7 +16,7 @@ import { runScenarioGroupDtoFactory } from '../dto/dtoFactoryIndex';
 import { RunScenarioGroupDto } from '../dto/dtoIndex';
 
 // ファクトリー関数
-import { testFunctionListFactory, createStrategies, testContentsListFactory } from '../factory/factoryIndex';
+import { testFunctionListFactory, createStrategies, testContentsListFactory, testDetailsListFactory } from '../factory/factoryIndex';
 
 import { SystemErrorHandler } from '../error/errorHandler/SystemErrorHandler';
 
@@ -63,10 +63,11 @@ export class RunService {
         
         /**
          * テストデータの初期化
-         * JSONの情報からテストのシナリオと関数をそれぞれ配列にする
-         * 
+         * JSONの情報からテストのシナリオ・関数・テスト詳細を配列にする
+         *
+         * シナリオ配列（クラス名）
          * [
-         *  [TestA, testB], 
+         *  [TestA, testB],
          *  [TestA]
          * ] 
          * 
@@ -79,11 +80,17 @@ export class RunService {
          *      ["open"]　　　　　　　testBで使う関数の配列
          *  ],
          *  [
-         *      ["open","search"]    TestAで使う関数の配列
+         *      ["open", "search"]   TestAで使う関数の配列
          *  ]
          * ]
+         *
+         * テスト詳細配列（テスト名と説明）
+         * [
+         *  ["testSampleA", "説明"],
+         *  ["testSampleB", "説明"]
+         * ]
          */
-        const { scenarioList, functionList } = this.testDataList();
+        const { scenarioList, functionList, detailsList } = this.testDataList();
 
 
         // 実行フェーズだけで開始ログを出す
@@ -91,18 +98,39 @@ export class RunService {
         
 
         /**
-         * DTOリストの作成
+         * DTOリストの作成（実行時の形）
+         *
+         * testContent.json が今の内容の場合、dtoList はこうなる:
          * [
-         *  [  シナリオ1　の配列
-         *    dto[TestA,open,search,..],　システム1つ目の内容
-         *    dto[testB,open,...]　　　　　　システム2つ目の内容
-         *  ],
-         *  [　シナリオ2　の配列
-         *   dto[TestA,open,search,....]　　　システム1つ目の内容
-         *  ]
+         *  {
+         *    testName: "testSampleA(このテストシナリオの名前)",
+         *    description: "このテストの説明",
+         *    scenarioIndex: 0,
+         *    contents: [
+         *      {
+         *        testList: [TestA, TestA],
+         *        myFunctionList: [["open", "search"], ["open"]],
+         *        mainLogger: TestLogger,
+         *        debugLogger: TestLogger
+         *      }
+         *    ]
+         *  },
+         *  {
+         *    testName: "testSampleB(このテストシナリオの名前)",
+         *    description: "このテストの説明",
+         *    scenarioIndex: 1,
+         *    contents: [
+         *      {
+         *        testList: [TestA],
+         *        myFunctionList: [["open", "search"]],
+         *        mainLogger: TestLogger,
+         *        debugLogger: TestLogger
+         *      }
+         *    ]
+         *  }
          * ]
          */
-        const dtoList: RunScenarioGroupDto[] = this.createDtoList(scenarioList, functionList);
+        const dtoList: RunScenarioGroupDto[] = this.createDtoList(scenarioList, functionList,detailsList);
 
         //DTOリストの返却
         return { dtoList };
@@ -110,11 +138,13 @@ export class RunService {
     }
 
     // テストデータの初期化
-    //JSONの情報からテストのシナリオと関数をそれぞれ配列にする
+    //JSONの情報からテストのシナリオ・関数・テスト詳細を配列にする
     testDataList() {
         const scenarioList: string[][] = testContentsListFactory();
         const functionList: ScenarioFunctionList[] = testFunctionListFactory();
-        return { scenarioList, functionList };
+        const detailsList: string[][] = testDetailsListFactory();
+        //後でここのstring[][]の部分をDTOに変更する
+        return { scenarioList, functionList, detailsList };
     }
 
     // 実行フェーズだけで開始ログを出す
@@ -139,21 +169,33 @@ export class RunService {
         });
     }
 
-    //DTOリストの作成
-    createDtoList(scenarioList: string[][], functionList: ScenarioFunctionList[]) {
+    // DTOリストの作成
+    createDtoList(scenarioList: string[][], functionList: ScenarioFunctionList[], detailsList: string[][]) {
+        
         return scenarioList.map((testScenario, scenarioIndex) => {
+            
             const myFunctionList = functionList[scenarioIndex];
+            const myDetails = detailsList[scenarioIndex]; 
+
+            // 1. 名前と説明を取り出す
+            const testName = myDetails[0];
+            const description = myDetails[1];
 
             // Strategy生成
             const testList: TestStrategy[] = createStrategies(testScenario);
             
             // DTO生成
             return runScenarioGroupDtoFactory({
-                testList,
-                scenarioIndex,
-                myFunctionList,
+                // ★ここに追加するだけでOK！
+                // (ファクトリーが中で contents 配列に包んでくれます)
+                testName: testName,
+                description: description,
+                
+                testList: testList,
+                scenarioIndex: scenarioIndex,
+                myFunctionList: myFunctionList,
                 mainLogger: this.mainLogger,
-                debugLogger: this.debugLogger
+                debugLogger: this.debugLogger,
             }); 
         });
     }

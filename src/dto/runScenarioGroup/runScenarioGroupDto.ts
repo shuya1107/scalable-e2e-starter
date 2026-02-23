@@ -2,20 +2,35 @@ import type { ScenarioStep, ScenarioFunctionList } from '../../typeList/index';
 import type { TestLogger } from '../../utils/TestLogger';
 
 /**
+ * contentsの中身（実行に必要なデータセット）の定義
+ */
+export interface ScenarioContent {
+    /** テストシナリオの配列 (TestA, TestB...) */
+    testList: ScenarioStep;
+    /** シナリオで使用する関数のリスト (["open"], ["search"]...) */
+    myFunctionList: ScenarioFunctionList;
+    /** メインログ出力用のロガー */
+    mainLogger: TestLogger;
+    /** デバッグログ出力用のロガー */
+    debugLogger: TestLogger;
+}
+
+/**
  * runScenarioGroup関数に渡す引数をまとめたDTO
  */
 export class RunScenarioGroupDto {
     
     constructor(
-        /** テストシナリオの配列 */
-        public readonly testList: ScenarioStep,
+        /** テストシナリオ名 (testSampleA) */
+        public readonly testName: string,
+
+        /** テストの説明 */
+        public readonly description: string,
+
         /** シナリオ番号 */
         public readonly scenarioIndex: number,
-        /** シナリオで使用する関数のリスト */
-        public readonly myFunctionList: ScenarioFunctionList,
-        /** メインログ出力用のロガー */
-        public readonly mainLogger: TestLogger,
-        /** デバッグログ出力用のロガー */
-        public readonly debugLogger: TestLogger
+
+        /** 実行データ (ここにtestListやloggerをまとめる) */
+        public readonly contents: ScenarioContent
     ) {}
 }
