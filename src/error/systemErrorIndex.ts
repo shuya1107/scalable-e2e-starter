@@ -31,3 +31,13 @@ export {
 export {
     TestDetailsListFactoryError
 } from './errors/testDetailsListFactoryError';
+
+// login 関数に関連するエラーをエクスポート
+export {
+    LoginError
+} from './expectedErrors/LoginError';
+
+// A_B_Testingに関連するエラーをエクスポート
+export {
+    A_B_TestingError
+} from './errors/A_B_TestingError';

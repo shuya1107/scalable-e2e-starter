@@ -1,0 +1,151 @@
+
+①新しくテストを作成する
+import { login } from "../util/login";
+import { TestLogger } from '../../../utils/TestLogger';
+import { TestExecutionContext } from "../../../typeList";
+import { テスト名_Function }　このクラスに対応する関数をまとめたMapを作成してここに入れる
+import { テスト名_TestingError }　このクラスに対応するエラークラスを作成してここに入れる
+
+export class テスト名（システム名など） {
+
+    stepName = 'テスト名';
+
+    async execute(context: TestExecutionContext): Promise<void> {
+
+        //@strategyIndex はテストのシナリオが入っている配列のインデックス番号
+        const index = context.strategyIndex;
+        //　ログファイルを作成　システム名_シナリオ手順番号.log で保存される
+        const logger = new TestLogger(context.testInfo.outputDir, `${this.stepName}_${index}.log`);
+        logger.log(`[開始] シナリオ: ${this.stepName} を開始します`);
+
+
+        // 現在実行中のアクション名を保持する変数(ログ出力用)
+        let currentActionName: string | undefined;
+
+        try {
+
+            // まずはログインしておく
+            await login(context.page);
+                    
+            // このA_B_Testingインスタンスに対応する関数リストだけを取得
+            const myFunctions = context.functions[index];
+            
+            for (const functionName of myFunctions) {
+            const actionName = functionName as string;
+            currentActionName = actionName;
+
+                // 関数を取り出す
+                const actionFunction = テスト名_Function[actionName];
+
+                // 関数が見つからなかったらエラー
+                if (!actionFunction) {
+                    // actionName が undefined の場合もあるのでケア
+                    throw new テスト名_TestingError(`未定義のアクションです: '${actionName}' は登録されていません。`, 'validation');
+                }
+
+                await actionFunction(context.page, context.data, logger);
+            }
+
+        } catch (e) {
+            logger.logError(e, `step=${index} action=${currentActionName ?? ''}`);
+            console.error(e);
+            throw e;
+        }
+    }
+}
+
+
+②テストクラスを管理しているMapにテストクラスを追加
+C:\my-playwright-home\src\strategiesConfig\strategyRecord.ts
+ここに新しく作成するテストクラスを追加する
+・上記の新しく作るクラスをインポートする
+・'クラス名':'クラス名' を追加する
+
+import { TestA } from "../testContent/testA/TestA";
+import { A_B_testing } from "../testContent/TestAutomationPractice/A_B_Testing/A_B_Testing";
+import type { TestStrategyRecord } from "../typeList/index";
+
+export const strategyRecord: TestStrategyRecord = {
+    'TestA': TestA,
+    'A_B_Testing': A_B_testing
+    
+    // ↓ TestStrategyを実装してないクラスを入れるとここで赤線エラーになる
+    // 'error': String 
+};
+
+
+③テストクラスに対応する自作エラークラスの作成
+import { BaseError } from '../BaseError';
+
+/**
+ * （作成したテストクラス）に関するエラーを表すクラス
+ */
+export class （作成したクラス名）Error extends BaseError {
+    constructor(
+        message: string,
+        errorType: 'validation' | 'unknown' = 'validation',
+        originalError?: unknown
+    ) {
+        super(
+            message,
+            errorType,
+            '作成したクラス名',　//ここ変更
+            originalError
+        );
+    }
+}
+
+
+④ラスに対応する関数にタグをつけるために型を作成する
+C:\my-playwright-home\src\typeList\types\testFunctionClassify.ts
+
+import { ActionFn } from "./functionTypes";
+
+// TestA用の関数型定義
+export type TestAFunction = ActionFn & { _tag: 'TestA' };
+
+// A/Bテストの関数を分類するための型定義
+export type A_B_TestingFunction = ActionFn & { _tag: 'A_B_Testing' };
+
+ここに追加をしていく
+
+
+⑤テストクラスで使う関数の作成（具体的な処理）
+import { expect } from '@playwright/test';
+import type { 上記④で追加した型をインポート } from '../../../../typeList';
+
+const functionName = "関数の名前"
+
+export const transition = (async (page, data, logger) => {
+    
+    logger.log(`${functionName}開始`);
+    
+
+    logger.log(`${functionName}成功`);
+
+}) as A_B_TestingFunction;
+
+
+
+⑤テストで使う関数を管理するMapを作成する
+下記は例
+
+import type { ActionFnMap, ④でつい9化した型をインポート } from '../../../../typeList';
+//下記は作成した関数をインポート
+import { transitionWithCookie } from './transitionWithCookie';
+import { transition } from './transition';
+
+
+// 文字列をキーにして、実行する関数を値に持つレコード
+export const テストクラス名: ActionFnMap<上記④で追加した型> = {
+    //　期待値が二つの見出しをOKとするパターンの関数
+    'transition': transition,
+    // クッキーを入れて特定の見出しを表示させるパターンの関数
+    'transitionWithCookie':transitionWithCookie
+};
+
+
+
+
+基本的に同じフォルダの階層か一つ上の階層にindexファイルがあるのでエクスポートを書き直すこと
+無い場合はindexファイルがないから大丈夫

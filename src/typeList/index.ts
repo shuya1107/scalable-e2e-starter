@@ -26,7 +26,8 @@ export type {
 
 // 各テスト固有の関数型定義
 export type {
-    TestAFunction
+    TestAFunction,
+    A_B_TestingFunction
 } from './types/testFunctionClassify';
 
 
